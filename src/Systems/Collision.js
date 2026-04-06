@@ -1,17 +1,11 @@
-import { Player } from '../Entities/Player/Player';
-import { EnemyManager } from '../Entities/Enemy/EnemyManager';
-
 export class CollisionSystem {
-    private player: Player
-    private enemyManager: EnemyManager
-
-    constructor(player: Player, enemyManager: EnemyManager) {
-        this.player = player
-        this.enemyManager = enemyManager
+    constructor(player, enemyManager) {
+        this.player = player;
+        this.enemyManager = enemyManager;
     }
 
-    // Đây là "Trạm điều khiển" sẽ được gọi mỗi khung hình
-    public update() {
+    // Cập nhật hệ thống va chạm mỗi khung hình
+    update() {
         const enemies = this.enemyManager.enemies;
         const pPos = this.player.mesh.position;
         const pRadius = this.player.radius;
@@ -20,28 +14,33 @@ export class CollisionSystem {
             const ePos = enemy.mesh.position;
             const eRadius = enemy.radius;
 
-            // Tính khoảng cách giữa Player và Enemy
+            // Tính khoảng cách giữa Player và Enemy trên mặt phẳng XZ
             const dx = ePos.x - pPos.x;
             const dz = ePos.z - pPos.z;
+
+            // Công thức Pythagoras: a^2 + b^2 = c^2
             const distance = Math.sqrt(dx * dx + dz * dz);
             const minDistance = pRadius + eRadius;
+
+            // Nếu khoảng cách thực tế nhỏ hơn tổng 2 bán kính -> Va chạm!
             if (distance < minDistance) {
                 this.handleCollision(enemy, distance, minDistance);
             }
         }
     }
 
-    private handleCollision(enemy: { mesh: { position: { x: number; z: number } } }, distance: number, minDistance: number) {
+    handleCollision(enemy, distance, minDistance) {
         const pPos = this.player.mesh.position;
         const ePos = enemy.mesh.position;
 
+        // Tính độ lẹm
         const overlap = minDistance - distance;
 
         // Tìm hướng đẩy
         const nx = distance > 0 ? (ePos.x - pPos.x) / distance : 1;
         const nz = distance > 0 ? (ePos.z - pPos.z) / distance : 0;
 
-        // Đẩy Enemy ra khỏi Player
+
         ePos.x += nx * overlap;
         ePos.z += nz * overlap;
 
