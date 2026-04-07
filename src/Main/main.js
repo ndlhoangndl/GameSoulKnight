@@ -47,7 +47,7 @@ const playerController = new PlayerController(player, input);
 const mapTexture = loader.load('/map.jpg');
 mapTexture.wrapS = THREE.RepeatWrapping;
 mapTexture.wrapT = THREE.RepeatWrapping;
-mapTexture.repeat.set(1, 1);
+mapTexture.repeat.set(25, 25);
 
 const groundGeo = new THREE.PlaneGeometry(100, 100);
 const groundMat = new THREE.MeshStandardMaterial({map: mapTexture});
