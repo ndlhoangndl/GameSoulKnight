@@ -4,26 +4,33 @@ import { GAME_CONSTANTS } from '../../utils/Constants.js'
 export class Player extends Entity {
     constructor(mesh) {
         // Gọi constructor cha với các hằng số từ file Constants
+        const startHp = GAME_CONSTANTS.player.startHp;
         super({
             mesh,
-            hp: GAME_CONSTANTS.player.startHp,
+            hp: startHp,
             radius: GAME_CONSTANTS.player.contactRadius
         });
+
+        // Lưu lại HP tối đa để tính % UI
+        this.maxHp = startHp;
 
         this.isDead = false;
     }
 
-    // Hàm nhận sát thương (ví dụ khi quái chạm vào người)
+    // Hàm nhận sát thương
     takeDamage(amount) {
-        if (this.isDead) return;
-
         this.hp -= amount;
-
-        // Hiệu ứng log đơn giản, sau này có thể thêm màn hình Game Over ở đây
         if (this.hp <= 0) {
             this.hp = 0;
             this.isDead = true;
-            console.log("Game Over! Player has died. 💀");
+        }
+
+        // Cập nhật UI ngay lập tức khi mất máu
+        // Ví dụ trong hàm cập nhật của ông
+        const hpFill = document.getElementById('hp-fill');
+        if (hpFill) {
+            const percentage = (this.hp / this.maxHp) * 100;
+            hpFill.style.width = percentage + "%";
         }
     }
 

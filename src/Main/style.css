@@ -1,0 +1,40 @@
+#player-ui {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5); /* Nền đen trong suốt */
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #444;
+}
+
+.bar-label {
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.bar-container {
+    width: 200px;
+    height: 12px;
+    background: #333; /* Màu nền khi máu mất đi */
+    border: 1px solid #000;
+    margin-bottom: 8px;
+}
+
+#hp-fill {
+    width: 100%; /* Mặc định đầy */
+    height: 100%;
+    background: #ff4d4d; /* Màu đỏ rực */
+    transition: width 0.3s ease-out;
+}
+
+#mana-fill {
+    width: 100%;
+    height: 100%;
+    background: #33ccff; /* Màu xanh nước biển */
+    transition: width 0.3s ease-out;
+}
