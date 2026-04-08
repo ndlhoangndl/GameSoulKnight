@@ -70,7 +70,7 @@ export class Enemy extends Entity {
         // Gọi hàm update của lớp cha để di chuyển quái
         super.update(dt);
 
-        // Hiệu ứng Billboard: Xoay thanh máu luôn đối diện với Camera
+        // Hiệu ứng Billboard
         if (this.billboardCamera) {
             this.hpBarContainer.quaternion.copy(this.billboardCamera.quaternion);
         }

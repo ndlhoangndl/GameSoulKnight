@@ -15,7 +15,7 @@ export class PlayerController {
             return;
         }
 
-        //  Khởi tạo hướng di chuyển bằng 0 (Vectơ rỗng)
+        //  Khởi tạo hướng di chuyển bằng 0
         const direction = new THREE.Vector3(0, 0, 0);
 
         //  Kiểm tra phím bấm để xác định hướng di chuyển

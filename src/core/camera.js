@@ -5,7 +5,7 @@ export class Camera extends THREE.PerspectiveCamera {
         const aspect = window.innerWidth / window.innerHeight;
         super(75, aspect, 0.1, 1000);
 
-        //vi tr
+        //vi tri
         this.position.set(0, 15, 10);
         this.lookAt(0, 0, 0);
     }

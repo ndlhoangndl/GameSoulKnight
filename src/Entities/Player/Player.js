@@ -26,7 +26,6 @@ export class Player extends Entity {
         }
 
         // Cập nhật UI ngay lập tức khi mất máu
-        // Ví dụ trong hàm cập nhật của ông
         const hpFill = document.getElementById('hp-fill');
         if (hpFill) {
             const percentage = (this.hp / this.maxHp) * 100;

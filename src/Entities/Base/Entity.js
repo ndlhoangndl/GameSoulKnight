@@ -2,13 +2,12 @@ import * as THREE from 'three'
 
 export class Entity {
   constructor(opts) {
-    // Trong JS
-    // Chỉ cần gán trực tiếp vào
+
     this.mesh = opts.mesh;
     this.velocity = new THREE.Vector3();
     this.hp = opts.hp;
     this.radius = opts.radius;
-    this.isDead = false; // Thêm biến này để dễ quản lý sau này
+    this.isDead = false;
   }
 
   // Hàm cập nhật vị trí dựa trên vận tốc và thời gian
