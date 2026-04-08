@@ -22,7 +22,7 @@ export class CollisionSystem {
             const distance = Math.sqrt(dx * dx + dz * dz);
             const minDistance = pRadius + eRadius;
 
-            // Nếu khoảng cách thực tế nhỏ hơn tổng 2 bán kính
+            // Nếu khoảng cách thực tế nhỏ hơn tổng 2 bán kínhsd
             if (distance < minDistance) {
                 this.handleCollision(enemy, distance, minDistance);
             }

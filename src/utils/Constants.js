@@ -1,6 +1,12 @@
 // Nơi tập trung tất cả các thông số có thể điều chỉnh của game.
 
-
+export const DUNGEON_MAP = [
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+	[1, 0, 1, 1, 0, 0, 1, 1, 0, 1],
+	[1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+];
 export const ASSET_URLS = {
 	map: '/map.jpg',
 	player: '/Player.png',
@@ -72,4 +78,5 @@ export const GAME_CONSTANTS = {
 	loop: {
 		maxDtSeconds: 0.05
 	}
+
 };

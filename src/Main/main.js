@@ -1,19 +1,17 @@
 import * as THREE from 'three'
-
 import {Scene} from '../core/Scene.js'
 import {Renderer} from '../core/Renderer.js'
 import {Camera} from '../core/camera.js'
 import {GameLoop} from '../core/Gameloop.js'
-
 import {Player} from '../Entities/Player/Player.js'
 import {PlayerController} from '../Entities/Player/PlayerControl.js'
 import {Bullet} from '../Entities/Bullet.js'
 import {Enemy} from '../Entities/Enemy/Enemy.js'
 import {EnemyManager} from '../Entities/Enemy/EnemyManager.js'
-
 import {CollisionSystem} from '../Systems/Collision.js'
 import {Input} from '../Systems/Input.js'
 import {SpawnSystem} from '../Systems/SpawnSystem.js'
+
 
 const scene = new Scene();
 const camera = new Camera();
@@ -72,6 +70,7 @@ enemyManager.addEnemy(enemy);
 const collisionSystem = new CollisionSystem(player, enemyManager);
 
 const bullets = [];
+const enemyBullets = [];
 
 const spawnSystem = new SpawnSystem(scene, enemyManager, camera, bossTexture, playerMesh)
 
@@ -102,44 +101,67 @@ const gameLoop = new GameLoop(
 
         playerController.update();
         player.update(dt);
-        enemyManager.update(dt, player);
+        // Enemy updates (shooting logic lives inside Enemy.update(dt, player, scene, enemyBullets))
+        for (const enemy of enemyManager.enemies) {
+            if (enemy && typeof enemy.update === 'function') {
+                enemy.update(dt, player, scene, enemyBullets);
+            }
+        }
         collisionSystem.update();
 
         for (let i = bullets.length - 1; i >= 0; i--) {
             const b = bullets[i];
             b.update(dt);
 
-            for (let j = enemyManager.enemies.length - 1; j >= 0; j--) {
-                const enemy = enemyManager.enemies[j];
-                const dist = b.mesh.position.distanceTo(enemy.mesh.position);
-                const hitThreshold = b.radius + enemy.radius;
+			for (let j = enemyManager.enemies.length - 1; j >= 0; j--) {
+				const enemy = enemyManager.enemies[j];
+				const dist = b.mesh.position.distanceTo(enemy.mesh.position);
+				if (dist < b.radius + enemy.radius) {
+					enemy.takeDamage(20);
+					b.isDead = true;
 
-                if (dist < hitThreshold) {
-                    enemy.takeDamage(20);
-                    b.isDead = true;
+					if (enemy.isDead) {
+						scene.remove(enemy.mesh);
+						enemyManager.enemies.splice(j, 1);
+					}
+					break;
+				}
+			}
 
-                    if (enemy.isDead) {
-                        scene.remove(enemy.mesh);
-                        enemyManager.enemies.splice(j, 1);
-                        console.log("Kẻ địch đã bị tiêu diệt!");
-                    }
-                    break;
+			if (b.isDead) {
+				scene.remove(b.mesh);
+				bullets.splice(i, 1);
+			}
+		}
+
+            for (let i = enemyBullets.length - 1; i >= 0; i--) {
+                const eb = enemyBullets[i];
+                eb.update(dt);
+
+                // Kiểm tra va chạm với Player
+                const distToPlayer = eb.mesh.position.distanceTo(player.mesh.position);
+                // Giả sử player có bán kính va chạm là 0.75
+                if (distToPlayer < 0.75 + eb.radius) {
+                    player.takeDamage(10); // Player mất 10 máu
+                    eb.isDead = true;
+                    console.log("Player bị trúng đạn! HP:", player.hp);
+                }
+
+                // Xóa đạn enemy nếu bay quá xa hoặc đã trúng đích
+                if (eb.isDead) {
+                    scene.remove(eb.mesh);
+                    enemyBullets.splice(i, 1);
                 }
             }
 
-            if (b.isDead) {
-                scene.remove(b.mesh);
-                bullets.splice(i, 1);
-            }
+            // --- 5. Camera Follow (Giữ nguyên) ---
+            const offset = new THREE.Vector3(0, 15, 10);
+            camera.position.copy(playerMesh.position).add(offset);
+            camera.lookAt(playerMesh.position);
+        },
+        () => {
+            renderer.render(scene, camera);
         }
-
-        const offset = new THREE.Vector3(0, 15, 10);
-        camera.position.copy(playerMesh.position).add(offset);
-        camera.lookAt(playerMesh.position);
-    },
-    () => {
-        renderer.render(scene, camera);
-    }
-);
+    );
 
 gameLoop.start();
