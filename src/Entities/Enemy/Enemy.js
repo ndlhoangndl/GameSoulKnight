@@ -6,16 +6,21 @@ const HP_BAR_WIDTH = 1.5
 const HP_BAR_HEIGHT = 0.2
 
 export class Enemy extends Entity {
-    constructor(mesh, maxHp = 100, radius = 0.75) {
+    constructor(mesh, maxHp = 100, radius = 0.75, opts = {}) {
         super({ mesh, hp: maxHp, radius });
         this.isDead = false;
         this.maxHp = maxHp;
         this.billboardCamera = null;
         // Thong so chien dau moi
-        this.attackRange = 15; // khoang cach bat dau ban player
-        this.fireRate = 1.0; // 1.5s ban 1 vien
+        this.attackRange = opts.attackRange ?? 15; // khoang cach bat dau ban player
+        this.fireRate = opts.fireRate ?? 1.0; // s/shot
         this.fireTimer = 0;         // Bộ đếm thời gian
-        this.bulletSpeed = 8;       // Đạn quái bay chậm hơn đạn người một chút cho dễ né
+        this.bulletSpeed = opts.bulletSpeed ?? 7;       // Đạn quái bay chậm hơn đạn người một chút cho dễ né
+
+        // Pattern bắn: 'single' | 'triple'
+        this.shotPattern = opts.shotPattern ?? 'single';
+        // Độ xoè của 2 viên hai bên (radians). ~12deg mặc định.
+        this.spreadAngle = opts.spreadAngle ?? (Math.PI / 15);
 
         this.createHPBar();
     }
@@ -53,13 +58,35 @@ export class Enemy extends Entity {
         this.hpBar.position.x = (1 - healthPercent) * -(HP_BAR_WIDTH / 2);
     }
 
-    // --- Hàm bắn đạn mới ---
+    // --- Hàm bắn đạn ---
     shoot(targetPosition, scene, enemyBullets) {
-        // Tính hướng từ quái đến player
+        if (this.shotPattern === 'triple') {
+            this.shootTriple(targetPosition, scene, enemyBullets);
+            return;
+        }
+
         const direction = new THREE.Vector3();
         direction.subVectors(targetPosition, this.mesh.position).normalize();
         direction.y = 0; // Bắn ngang mặt đất
+        this.spawnBullet(direction, scene, enemyBullets);
+    }
 
+    shootTriple(targetPosition, scene, enemyBullets) {
+        const baseDir = new THREE.Vector3();
+        baseDir.subVectors(targetPosition, this.mesh.position).normalize();
+        baseDir.y = 0;
+        if (baseDir.lengthSq() <= 0.0001) return;
+
+        // 3 hướng: giữa, lệch trái, lệch phải
+        const dirs = [
+            baseDir.clone(),
+            baseDir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), -this.spreadAngle),
+            baseDir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), this.spreadAngle)
+        ];
+        for (const d of dirs) this.spawnBullet(d, scene, enemyBullets);
+    }
+
+    spawnBullet(direction, scene, enemyBullets) {
         // Tạo mesh viên đạn quái (Màu đỏ/cam để phân biệt)
         const bulletGeo = new THREE.SphereGeometry(0.2, 8, 8);
         const bulletMat = new THREE.MeshBasicMaterial({ color: 0xff5500 });
@@ -67,7 +94,6 @@ export class Enemy extends Entity {
         bulletMesh.position.copy(this.mesh.position);
         scene.add(bulletMesh);
 
-        // Tạo object Bullet và đưa vào mảng quản lý của enemy
         const bullet = new Bullet(bulletMesh, direction, this.bulletSpeed);
         enemyBullets.push(bullet);
     }

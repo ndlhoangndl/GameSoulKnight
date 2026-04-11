@@ -2,11 +2,12 @@ import * as THREE from 'three'
 import { Enemy } from '../Entities/Enemy/Enemy.js'
 
 export class SpawnSystem {
-	constructor(scene, enemyManager, camera, bossTexture, playerMesh, opts = {}) {
+	constructor(scene, enemyManager, camera, bossTexture, boss2Texture, playerMesh, opts = {}) {
 		this.scene = scene;
 		this.enemyManager = enemyManager;
 		this.camera = camera;
 		this.bossTexture = bossTexture;
+		this.boss2Texture = boss2Texture;
 		this.playerMesh = playerMesh;
 
 		// Sử dụng giá trị mặc định nếu không có opts truyền vào
@@ -40,8 +41,13 @@ export class SpawnSystem {
 
 		// 2. Tạo Mesh cho quái vật
 		const enemyGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+		// Random spawn: 80% enemy thường (boss.png, bắn 1 viên) + 20% boss2 (bắn 3 viên)
+		const roll = Math.random();
+		const isBoss2 = roll < 0.2;
+		const texture = isBoss2 ? this.boss2Texture : this.bossTexture;
+
 		const enemyMat = new THREE.MeshStandardMaterial({
-			map: this.bossTexture,
+			map: texture,
 			transparent: true
 		});
 		const enemyMesh = new THREE.Mesh(enemyGeo, enemyMat);
@@ -51,7 +57,9 @@ export class SpawnSystem {
 		this.scene.add(enemyMesh);
 
 		// 3. Khởi tạo đối tượng Enemy và đưa vào Manager để quản lý logic
-		const newEnemy = new Enemy(enemyMesh);
+		const newEnemy = isBoss2
+			? new Enemy(enemyMesh, 200, 0.75, { shotPattern: 'triple', fireRate: 1.0, attackRange: 18 })
+			: new Enemy(enemyMesh);
 		newEnemy.setBillboardCamera(this.camera);
 		this.enemyManager.addEnemy(newEnemy);
 	}

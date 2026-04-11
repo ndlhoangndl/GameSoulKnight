@@ -1,167 +1,90 @@
-import * as THREE from 'three'
-import {Scene} from '../core/Scene.js'
-import {Renderer} from '../core/Renderer.js'
-import {Camera} from '../core/camera.js'
-import {GameLoop} from '../core/Gameloop.js'
-import {Player} from '../Entities/Player/Player.js'
-import {PlayerController} from '../Entities/Player/PlayerControl.js'
-import {Bullet} from '../Entities/Bullet.js'
-import {Enemy} from '../Entities/Enemy/Enemy.js'
-import {EnemyManager} from '../Entities/Enemy/EnemyManager.js'
-import {CollisionSystem} from '../Systems/Collision.js'
-import {Input} from '../Systems/Input.js'
-import {SpawnSystem} from '../Systems/SpawnSystem.js'
+import * as THREE from 'three';
+import { EnemyManager } from '../Entities/Enemy/EnemyManager.js';
+import { CollisionSystem } from '../Systems/Collision.js';
+import { SpawnSystem } from '../Systems/SpawnSystem.js';
 
+import { createGameContext } from '../game/bootstrap/createGameContext.js';
+import { createGround } from '../game/world/createGround.js';
+import { createPlayer } from '../game/factories/createPlayer.js';
+import { createEnemy } from '../game/factories/createEnemy.js';
 
-const scene = new Scene();
-const camera = new Camera();
-const renderer = new Renderer();
-const input = new Input();
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-const targetPoint = new THREE.Vector3();
+import { createPlayerShootSystem } from '../game/systems/createPlayerShootSystem.js';
+import { createBulletSystem } from '../game/systems/createBulletSystem.js';
+import { createEnemyBulletSystem } from '../game/systems/createEnemyBulletSystem.js';
+import { createCameraFollowSystem } from '../game/systems/createCameraFollowSystem.js';
+import { wireGameLoop } from '../game/wireGameLoop.js';
 
-const loader = new THREE.TextureLoader();
+// 1) Core context
+const { scene, camera, renderer, input, textures } = createGameContext();
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-scene.add(ambientLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-dirLight.position.set(5, 10, 7);
-scene.add(dirLight);
+// 2) World
+createGround({ scene, texture: textures.map });
 
-const playerTexture = loader.load('/Player.png');
-const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
-const playerMaterial = new THREE.MeshStandardMaterial({
-    map: playerTexture,
-    transparent: true
+// 3) Player
+const { playerMesh, player, playerController } = createPlayer({
+	scene,
+	texture: textures.player,
+	input
 });
-const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial);
-scene.add(playerMesh);
 
-const player = new Player(playerMesh);
-const playerController = new PlayerController(player, input);
-
-const mapTexture = loader.load('/map.jpg');
-mapTexture.wrapS = THREE.RepeatWrapping;
-mapTexture.wrapT = THREE.RepeatWrapping;
-mapTexture.repeat.set(25, 25);
-
-const groundGeo = new THREE.PlaneGeometry(100, 100);
-const groundMat = new THREE.MeshStandardMaterial({map: mapTexture});
-const ground = new THREE.Mesh(groundGeo, groundMat);
-ground.rotation.x = -Math.PI / 2;
-ground.position.y = -0.5;
-scene.add(ground);
-
+// 4) Enemies
 const enemyManager = new EnemyManager();
 
-const bossTexture = loader.load('/boss.png');
-const enemyGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-const enemyMat = new THREE.MeshStandardMaterial({map: bossTexture, transparent: true});
-const enemyMesh = new THREE.Mesh(enemyGeo, enemyMat);
-enemyMesh.position.set(10, 0.25, -10);
-scene.add(enemyMesh);
+// Enemy 1 (cũ): boss.png, bắn 1 viên
+enemyManager.addEnemy(
+	createEnemy({
+		scene,
+		camera,
+		variant: 'boss1',
+		texture: textures.boss,
+		position: new THREE.Vector3(10, 0.25, -10)
+	})
+);
 
-const enemy = new Enemy(enemyMesh);
-enemy.setBillboardCamera(camera);
-enemyManager.addEnemy(enemy);
+// Enemy 2 (mới): boss2.png, bắn 3 viên
+enemyManager.addEnemy(
+	createEnemy({
+		scene,
+		camera,
+		variant: 'boss2',
+		texture: textures.boss2,
+		position: new THREE.Vector3(-10, 0.25, -10)
+	})
+);
 
+// 5) Systems
 const collisionSystem = new CollisionSystem(player, enemyManager);
+const spawnSystem = new SpawnSystem(scene, enemyManager, camera, textures.boss, textures.boss2, playerMesh);
 
 const bullets = [];
 const enemyBullets = [];
 
-const spawnSystem = new SpawnSystem(scene, enemyManager, camera, bossTexture, playerMesh)
-
-window.addEventListener('mousedown', (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-    raycaster.ray.intersectPlane(plane, targetPoint);
-
-    const direction = new THREE.Vector3();
-    direction.subVectors(targetPoint, playerMesh.position).normalize();
-    direction.y = 0;
-
-    const bulletGeo = new THREE.SphereGeometry(0.15, 8, 8);
-    const bulletMat = new THREE.MeshBasicMaterial({color: 0xffcc00});
-    const bulletMesh = new THREE.Mesh(bulletGeo, bulletMat);
-    bulletMesh.position.copy(playerMesh.position);
-    scene.add(bulletMesh);
-
-    const bullet = new Bullet(bulletMesh, direction, 15);
-    bullets.push(bullet);
+createPlayerShootSystem({
+	windowTarget: window,
+	camera,
+	playerMesh,
+	scene,
+	bullets
 });
 
-const gameLoop = new GameLoop(
-    (dt) => {
-        spawnSystem.update(dt)
+const bulletSystem = createBulletSystem({ scene, bullets, enemyManager });
+const enemyBulletSystem = createEnemyBulletSystem({ scene, enemyBullets, player });
+const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh });
 
-        playerController.update();
-        player.update(dt);
-        // Enemy updates (shooting logic lives inside Enemy.update(dt, player, scene, enemyBullets))
-        for (const enemy of enemyManager.enemies) {
-            if (enemy && typeof enemy.update === 'function') {
-                enemy.update(dt, player, scene, enemyBullets);
-            }
-        }
-        collisionSystem.update();
-
-        for (let i = bullets.length - 1; i >= 0; i--) {
-            const b = bullets[i];
-            b.update(dt);
-
-			for (let j = enemyManager.enemies.length - 1; j >= 0; j--) {
-				const enemy = enemyManager.enemies[j];
-				const dist = b.mesh.position.distanceTo(enemy.mesh.position);
-				if (dist < b.radius + enemy.radius) {
-					enemy.takeDamage(20);
-					b.isDead = true;
-
-					if (enemy.isDead) {
-						scene.remove(enemy.mesh);
-						enemyManager.enemies.splice(j, 1);
-					}
-					break;
-				}
-			}
-
-			if (b.isDead) {
-				scene.remove(b.mesh);
-				bullets.splice(i, 1);
-			}
-		}
-
-            for (let i = enemyBullets.length - 1; i >= 0; i--) {
-                const eb = enemyBullets[i];
-                eb.update(dt);
-
-                // Kiểm tra va chạm với Player
-                const distToPlayer = eb.mesh.position.distanceTo(player.mesh.position);
-                // Giả sử player có bán kính va chạm là 0.75
-                if (distToPlayer < 0.75 + eb.radius) {
-                    player.takeDamage(10); // Player mất 10 máu
-                    eb.isDead = true;
-                    console.log("Player bị trúng đạn! HP:", player.hp);
-                }
-
-                // Xóa đạn enemy nếu bay quá xa hoặc đã trúng đích
-                if (eb.isDead) {
-                    scene.remove(eb.mesh);
-                    enemyBullets.splice(i, 1);
-                }
-            }
-
-            // --- 5. Camera Follow (Giữ nguyên) ---
-            const offset = new THREE.Vector3(0, 15, 10);
-            camera.position.copy(playerMesh.position).add(offset);
-            camera.lookAt(playerMesh.position);
-        },
-        () => {
-            renderer.render(scene, camera);
-        }
-    );
+// 6) Game loop
+const gameLoop = wireGameLoop({
+	spawnSystem,
+	playerController,
+	player,
+	enemyManager,
+	scene,
+	enemyBullets,
+	collisionSystem,
+	bulletSystem,
+	enemyBulletSystem,
+	cameraFollowSystem,
+	renderer,
+	camera
+});
 
 gameLoop.start();
