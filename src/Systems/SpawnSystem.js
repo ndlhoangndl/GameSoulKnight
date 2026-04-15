@@ -33,6 +33,7 @@ export class SpawnSystem {
 
 	spawnEnemy() {
 
+
 		// Giúp quái xuất hiện từ ngoài màn hình và bao vây người chơi
 		const angle = Math.random() * Math.PI * 2;
 		const radius = 15 + Math.random() * 5;
