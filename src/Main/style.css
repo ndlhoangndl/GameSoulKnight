@@ -39,6 +39,64 @@
     transition: width 0.3s ease-out;
 }
 
+/* --- Pause button (top-right) --- */
+.pause-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    z-index: 1500;
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.45);
+    background: #caa06a;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 6px 16px rgba(0, 0, 0, 0.28);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.pause-btn:active {
+    transform: translateY(1px);
+}
+
+.pause-icon {
+    width: 16px;
+    height: 18px;
+    position: relative;
+}
+
+/* pause: two vertical bars */
+.pause-icon::before,
+.pause-icon::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: rgba(38, 26, 12, 0.95);
+    border-radius: 2px;
+}
+
+.pause-icon::before { left: 0; }
+.pause-icon::after { right: 0; }
+
+/* when paused -> show play triangle */
+.pause-btn.is-paused .pause-icon::before,
+.pause-btn.is-paused .pause-icon::after {
+    width: 0;
+    background: transparent;
+}
+
+.pause-btn.is-paused .pause-icon {
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 16px solid rgba(38, 26, 12, 0.95);
+    transform: translateX(2px);
+}
+
 .overlay {
     position: fixed;
     inset: 0;

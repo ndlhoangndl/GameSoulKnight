@@ -4,6 +4,7 @@ export class GameLoop {
 
   constructor(update, render) {
     this.running = false;
+    this.paused = false;
     this.lastTime = performance.now();
     this.rafId = 0;
 
@@ -14,6 +15,12 @@ export class GameLoop {
   // Hàm loop xử lý mỗi khung hình
   loop = (currentTime) => {
     if (!this.running) return;
+  // Khi pause: vẫn giữ nhịp RAF nhưng không update logic.
+  if (this.paused) {
+    this.lastTime = currentTime;
+    this.rafId = requestAnimationFrame(this.loop);
+    return;
+  }
 
     // Tính delta time
     let dt = (currentTime - this.lastTime) / 1000;
@@ -41,5 +48,20 @@ export class GameLoop {
   stop() {
     this.running = false;
     cancelAnimationFrame(this.rafId);
+  }
+
+  pause() {
+    this.paused = true;
+  }
+
+  resume() {
+    this.paused = false;
+    this.lastTime = performance.now();
+  }
+
+  togglePause() {
+    if (!this.running) return;
+    if (this.paused) this.resume();
+    else this.pause();
   }
 }

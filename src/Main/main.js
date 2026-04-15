@@ -17,6 +17,7 @@ import { createCameraFollowSystem } from '../game/systems/createCameraFollowSyst
 import { createWorldBoundsSystem } from '../game/systems/createWorldBoundsSystem.js';
 import { wireGameLoop } from '../game/wireGameLoop.js';
 import { LoadingScreen } from '../UI/LoadingScreen.js';
+import { PauseButton } from '../UI/PauseButton.js';
 
 // 1) Core context
 const { scene, camera, renderer, input, textures } = createGameContext();
@@ -110,6 +111,9 @@ await loading.fakeLoad({ durationMs: 3500 });
 // Start game only after loading hits 100%
 gameLoop.start();
 loading.hide();
+
+// Pause button (top-right)
+new PauseButton({ gameLoop });
 
 // --- Game Over UI ---
 const gameOverEl = document.getElementById('game-over');
