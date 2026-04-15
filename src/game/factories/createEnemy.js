@@ -4,9 +4,16 @@ import { Enemy } from '../../Entities/Enemy/Enemy.js';
 
 export function createEnemy({ scene, camera, variant, texture, position }) {
 	if (variant === 'boss2') {
-		const boss2Geo = new THREE.BoxGeometry(1.8, 1.8, 1.8);
-		const boss2Mat = new THREE.MeshStandardMaterial({ map: texture, transparent: true });
+		const boss2Geo = new THREE.PlaneGeometry(2.4, 2.4);
+		const boss2Mat = new THREE.MeshBasicMaterial({
+			map: texture,
+			transparent: true,
+			alphaTest: 0.5,
+			depthWrite: false
+		});
 		const boss2Mesh = new THREE.Mesh(boss2Geo, boss2Mat);
+		// Nằm ngang trên mặt đất để camera top-down nhìn giống sprite 2D
+		boss2Mesh.rotation.x = -Math.PI / 2;
 		boss2Mesh.position.copy(position);
 		scene.add(boss2Mesh);
 
@@ -20,9 +27,15 @@ export function createEnemy({ scene, camera, variant, texture, position }) {
 	}
 
 	// boss1 (cũ)
-	const enemyGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-	const enemyMat = new THREE.MeshStandardMaterial({ map: texture, transparent: true });
+	const enemyGeo = new THREE.PlaneGeometry(2.0, 2.0);
+	const enemyMat = new THREE.MeshBasicMaterial({
+		map: texture,
+		transparent: true,
+		alphaTest: 0.5,
+		depthWrite: false
+	});
 	const enemyMesh = new THREE.Mesh(enemyGeo, enemyMat);
+	enemyMesh.rotation.x = -Math.PI / 2;
 	enemyMesh.position.copy(position);
 	scene.add(enemyMesh);
 

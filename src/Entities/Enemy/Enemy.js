@@ -27,15 +27,17 @@ export class Enemy extends Entity {
 
     createHPBar() {
         this.hpBarContainer = new THREE.Group();
+		// Thanh máu kiểu 2D: nằm ngang trên mặt đất (giống sprite), không "dán" lên mặt khối.
+		// Khi enemy là PlaneGeometry top-down, thanh máu cũng nên là plane top-down.
 
         // Thanh nền
         const bgGeo = new THREE.PlaneGeometry(HP_BAR_WIDTH, HP_BAR_HEIGHT);
-		const bgMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+		const bgMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide, depthWrite: false });
         const bgMesh = new THREE.Mesh(bgGeo, bgMat);
 
         //  Thanh máu chính
         const hpGeo = new THREE.PlaneGeometry(HP_BAR_WIDTH, HP_BAR_HEIGHT);
-        const hpMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+		const hpMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide, depthWrite: false });
         this.hpBar = new THREE.Mesh(hpGeo, hpMat);
 
         // Đặt thanh máu đè lên thanh nền một chút để không bị nhấp nháy
@@ -44,8 +46,9 @@ export class Enemy extends Entity {
         this.hpBarContainer.add(bgMesh);
         this.hpBarContainer.add(this.hpBar);
 
-        // Đặt thanh máu lơ lửng trên đầu Enemy
+        // Đặt thanh máu "trên đầu" theo kiểu top-down: tăng Y một chút, vẫn nằm ngang
         this.hpBarContainer.position.y = 2;
+		this.hpBarContainer.rotation.x = -Math.PI / 2;
         this.mesh.add(this.hpBarContainer);
     }
 
@@ -127,11 +130,10 @@ export class Enemy extends Entity {
       this.velocity.set(0, 0, 0);
     }
 
-        // 1. Xoay hướng về phía Player mượt mà (lookAt)
-        // Chúng ta lấy vị trí player nhưng giữ nguyên độ cao Y của quái để quái không bị gục đầu xuống đất
-        const lookTarget = player.mesh.position.clone();
-        lookTarget.y = this.mesh.position.y;
-        this.mesh.lookAt(lookTarget);
+        // 1. Billboard: luôn nhìn về hướng camera (kiểu 2D)
+        if (this.billboardCamera) {
+            this.mesh.quaternion.copy(this.billboardCamera.quaternion);
+        }
 
         // 2. Logic Bắn đạn
         const distance = this.mesh.position.distanceTo(player.mesh.position);
@@ -143,10 +145,7 @@ export class Enemy extends Entity {
             }
         }
 
-        // 3. Hiệu ứng Billboard cho thanh máu
-        if (this.billboardCamera) {
-            this.hpBarContainer.quaternion.copy(this.billboardCamera.quaternion);
-        }
+        // 3. Thanh máu top-down: đã xoay nằm ngang ngay từ đầu, không cần copy quaternion theo camera
 
         super.update(dt);
     }

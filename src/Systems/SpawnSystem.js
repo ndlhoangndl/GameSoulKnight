@@ -40,18 +40,21 @@ export class SpawnSystem {
 		const x = this.playerMesh.position.x + Math.cos(angle) * radius;
 		const z = this.playerMesh.position.z + Math.sin(angle) * radius;
 
-		// 2. Tạo Mesh cho quái vật
-		const enemyGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+		// 2. Tạo Mesh cho quái vật (sprite 2D)
+		const enemyGeo = new THREE.PlaneGeometry(2.0, 2.0);
 		// Random spawn: 80% enemy thường (boss.png, bắn 1 viên) + 20% boss2 (bắn 3 viên)
 		const roll = Math.random();
 		const isBoss2 = roll < 0.2;
 		const texture = isBoss2 ? this.boss2Texture : this.bossTexture;
 
-		const enemyMat = new THREE.MeshStandardMaterial({
+		const enemyMat = new THREE.MeshBasicMaterial({
 			map: texture,
-			transparent: true
+			transparent: true,
+			alphaTest: 0.5,
+			depthWrite: false
 		});
 		const enemyMesh = new THREE.Mesh(enemyGeo, enemyMat);
+		enemyMesh.rotation.x = -Math.PI / 2;
 
 		// Đặt vị trí và thêm vào Scene
 		enemyMesh.position.set(x, 0.1, z);

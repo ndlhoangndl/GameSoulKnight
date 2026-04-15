@@ -7,7 +7,7 @@ import { PlayerController } from '../../Entities/Player/PlayerControl.js';
  * Giữ nguyên geometry/material như main.js cũ.
  */
 export function createPlayer({ scene, texture, input }) {
-	const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
+	const playerGeometry = new THREE.BoxGeometry(1.6, 1.6, 1.6);
 	const playerMaterial = new THREE.MeshStandardMaterial({
 		map: texture,
 		transparent: true
