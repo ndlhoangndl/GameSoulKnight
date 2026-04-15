@@ -30,7 +30,7 @@ export class Enemy extends Entity {
 
         // Thanh nền
         const bgGeo = new THREE.PlaneGeometry(HP_BAR_WIDTH, HP_BAR_HEIGHT);
-        const bgMat = new THREE.MeshBasicMaterial({ color: 0x333333 });
+		const bgMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
         const bgMesh = new THREE.Mesh(bgGeo, bgMat);
 
         //  Thanh máu chính

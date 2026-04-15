@@ -1,10 +1,17 @@
-
-export function createEnemyBulletSystem({ scene, enemyBullets, player }) {
+export function createEnemyBulletSystem({ scene, enemyBullets, player, worldBounds }) {
 	return {
 		update(dt) {
 			for (let i = enemyBullets.length - 1; i >= 0; i--) {
 				const eb = enemyBullets[i];
 				eb.update(dt);
+
+				// Remove enemy bullet if it goes out of bounds
+				if (worldBounds) {
+					const p = eb.mesh.position;
+					if (p.x < worldBounds.minX || p.x > worldBounds.maxX || p.z < worldBounds.minZ || p.z > worldBounds.maxZ) {
+						eb.isDead = true;
+					}
+				}
 
 				const distToPlayer = eb.mesh.position.distanceTo(player.mesh.position);
 				if (distToPlayer < 0.75 + eb.radius) {
@@ -21,4 +28,3 @@ export function createEnemyBulletSystem({ scene, enemyBullets, player }) {
 		}
 	};
 }
-

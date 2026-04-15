@@ -8,7 +8,8 @@ export const ASSET_URLS = {
 
 export const GAME_CONSTANTS = {
 	world: {
-		size: 60,
+		// Kích thước map/ground (createGround đang dùng PlaneGeometry(100,100))
+		size: 100,
 		groundY: -0.5,
 		boundsInset: 1,
 		offscreenPadding: 5

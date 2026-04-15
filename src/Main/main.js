@@ -5,6 +5,8 @@ import { SpawnSystem } from '../Systems/SpawnSystem.js';
 
 import { createGameContext } from '../game/bootstrap/createGameContext.js';
 import { createGround } from '../game/world/createGround.js';
+import { createWorldBounds } from '../game/world/createWorldBounds.js';
+import { createDungeonTexture } from '../game/world/createDungeonTexture.js';
 import { createPlayer } from '../game/factories/createPlayer.js';
 import { createEnemy } from '../game/factories/createEnemy.js';
 
@@ -12,13 +14,21 @@ import { createPlayerShootSystem } from '../game/systems/createPlayerShootSystem
 import { createBulletSystem } from '../game/systems/createBulletSystem.js';
 import { createEnemyBulletSystem } from '../game/systems/createEnemyBulletSystem.js';
 import { createCameraFollowSystem } from '../game/systems/createCameraFollowSystem.js';
+import { createWorldBoundsSystem } from '../game/systems/createWorldBoundsSystem.js';
 import { wireGameLoop } from '../game/wireGameLoop.js';
 
 // 1) Core context
 const { scene, camera, renderer, input, textures } = createGameContext();
 
 // 2) World
-createGround({ scene, texture: textures.map });
+const dungeonTexture = createDungeonTexture({
+	seed: 1337,
+	tileCount: 14
+});
+createGround({ scene, texture: dungeonTexture });
+
+// World bounds (tường đỏ quanh map)
+const { bounds: worldBounds } = createWorldBounds({ scene });
 
 // 3) Player
 const { playerMesh, player, playerController } = createPlayer({
@@ -67,9 +77,11 @@ createPlayerShootSystem({
 	bullets
 });
 
-const bulletSystem = createBulletSystem({ scene, bullets, enemyManager });
-const enemyBulletSystem = createEnemyBulletSystem({ scene, enemyBullets, player });
+	const bulletSystem = createBulletSystem({ scene, bullets, enemyManager, worldBounds });
+	const enemyBulletSystem = createEnemyBulletSystem({ scene, enemyBullets, player, worldBounds });
 const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh });
+
+const worldBoundsSystem = createWorldBoundsSystem({ playerMesh, bounds: worldBounds });
 
 // 6) Game loop
 const gameLoop = wireGameLoop({
@@ -80,11 +92,44 @@ const gameLoop = wireGameLoop({
 	scene,
 	enemyBullets,
 	collisionSystem,
-	bulletSystem,
+		bulletSystem,
 	enemyBulletSystem,
 	cameraFollowSystem,
+	worldBoundsSystem,
 	renderer,
 	camera
 });
 
 gameLoop.start();
+
+// --- Game Over UI ---
+const gameOverEl = document.getElementById('game-over');
+const restartBtn = document.getElementById('btn-restart');
+
+let gameOverShown = false;
+function showGameOver() {
+	if (gameOverShown) return;
+	gameOverShown = true;
+	if (gameOverEl) {
+		gameOverEl.classList.remove('hidden');
+		gameOverEl.setAttribute('aria-hidden', 'false');
+	}
+}
+
+function restartGame() {
+	// Cách đơn giản nhất để reset toàn bộ state hiện tại.
+	window.location.reload();
+}
+
+if (restartBtn) restartBtn.addEventListener('click', restartGame);
+window.addEventListener('keydown', (e) => {
+	if (!gameOverShown) return;
+	if (e.code === 'KeyR' || e.code === 'Enter' || e.code === 'Space') restartGame();
+});
+
+// Check chết theo frame (không sửa thêm logic entity)
+function gameOverWatcher() {
+	if (player.isDead) showGameOver();
+	requestAnimationFrame(gameOverWatcher);
+}
+requestAnimationFrame(gameOverWatcher);

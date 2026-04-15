@@ -14,6 +14,7 @@
     "vite": "^8.0.1"
   },
   "dependencies": {
+    "socket.io-client": "^4.8.3",
     "three": "^0.183.2"
   },
   "optionalDependencies": {

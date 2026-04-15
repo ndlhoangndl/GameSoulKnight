@@ -15,6 +15,7 @@ export function wireGameLoop({
 	bulletSystem,
 	enemyBulletSystem,
 	cameraFollowSystem,
+	worldBoundsSystem,
 	renderer,
 	camera
 }) {
@@ -24,6 +25,7 @@ export function wireGameLoop({
 
 			playerController.update();
 			player.update(dt);
+			if (worldBoundsSystem) worldBoundsSystem.update(dt);
 
 			for (const enemy of enemyManager.enemies) {
 				if (enemy && typeof enemy.update === 'function') {

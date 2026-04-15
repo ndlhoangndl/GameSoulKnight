@@ -38,3 +38,55 @@
     background: #33ccff;
     transition: width 0.3s ease-out;
 }
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(3px);
+}
+
+.overlay.hidden {
+    display: none;
+}
+
+.overlay-card {
+    width: min(420px, calc(100vw - 40px));
+    background: rgba(16, 16, 16, 0.92);
+    border: 1px solid #2b2b2b;
+    border-radius: 10px;
+    padding: 18px 18px;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+.overlay-card h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.overlay-card p {
+    margin: 0 0 14px;
+    opacity: 0.9;
+}
+
+#btn-restart {
+    appearance: none;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    background: #111;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+#btn-restart:hover {
+    background: #1a1a1a;
+}
