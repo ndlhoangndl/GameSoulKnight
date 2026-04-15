@@ -90,3 +90,123 @@
 #btn-restart:hover {
     background: #1a1a1a;
 }
+
+/* --- Loading screen --- */
+.loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: #1f2a33;
+    display: none;
+}
+
+.loading-screen.active {
+    display: block;
+}
+
+.loading-topbar {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    color: #ffffff;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-weight: 700;
+    opacity: 0.95;
+}
+
+.loading-center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
+
+.moon {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffcf7a 0%, #ff7cc1 35%, #8a65ff 100%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    position: relative;
+}
+
+.cloud {
+    position: absolute;
+    width: 58px;
+    height: 22px;
+    background: #ffffff;
+    border-radius: 999px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.cloud:before,
+.cloud:after {
+    content: '';
+    position: absolute;
+    background: #ffffff;
+    border-radius: 50%;
+}
+
+.cloud:before {
+    width: 24px;
+    height: 24px;
+    left: 8px;
+    top: -12px;
+}
+
+.cloud:after {
+    width: 20px;
+    height: 20px;
+    right: 8px;
+    top: -10px;
+}
+
+.cloud-left {
+    transform: translate(-44px, 10px);
+}
+
+.cloud-right {
+    transform: translate(44px, 6px) scale(0.85);
+    opacity: 0.95;
+}
+
+.loading-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 26px;
+    display: flex;
+    justify-content: center;
+}
+
+.loading-track {
+    width: min(980px, calc(100vw - 80px));
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-progress {
+    height: 100%;
+	width: 0;
+    background: linear-gradient(90deg, #9c7bff, #6f8cff);
+    border-radius: 999px;
+    transition: width 120ms linear;
+}
+
+.loading-label {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: rgba(255, 255, 255, 0.92);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+

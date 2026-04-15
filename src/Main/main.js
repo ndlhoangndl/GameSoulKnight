@@ -16,6 +16,7 @@ import { createEnemyBulletSystem } from '../game/systems/createEnemyBulletSystem
 import { createCameraFollowSystem } from '../game/systems/createCameraFollowSystem.js';
 import { createWorldBoundsSystem } from '../game/systems/createWorldBoundsSystem.js';
 import { wireGameLoop } from '../game/wireGameLoop.js';
+import { LoadingScreen } from '../UI/LoadingScreen.js';
 
 // 1) Core context
 const { scene, camera, renderer, input, textures } = createGameContext();
@@ -100,7 +101,15 @@ const gameLoop = wireGameLoop({
 	camera
 });
 
+// --- Loading on entry (UI only) ---
+const loading = new LoadingScreen();
+loading.show();
+
+await loading.fakeLoad({ durationMs: 3500 });
+
+// Start game only after loading hits 100%
 gameLoop.start();
+loading.hide();
 
 // --- Game Over UI ---
 const gameOverEl = document.getElementById('game-over');
