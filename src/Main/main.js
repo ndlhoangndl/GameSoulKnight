@@ -76,6 +76,7 @@ const spawnSystem = new SpawnSystem(scene, enemyManager, camera, textures.boss, 
 const bullets = [];
 const enemyBullets = [];
 const manaItems = [];
+const hpItems = [];
 
 createPlayerShootSystem({
 	windowTarget: window,
@@ -86,13 +87,63 @@ createPlayerShootSystem({
 	bullets
 });
 
-const bulletSystem = createBulletSystem({ scene, bullets, enemyManager, worldBounds, manaItems });
+const bulletSystem = createBulletSystem({ scene, bullets, enemyManager, worldBounds, manaItems, hpItems });
 const enemyBulletSystem = createEnemyBulletSystem({ scene, enemyBullets, player, worldBounds });
 const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh });
 
 const worldBoundsSystem = createWorldBoundsSystem({ playerMesh, bounds: worldBounds });
 
-const itemSystem = createItemSystem({ scene, player, manaItems });
+const itemSystem = createItemSystem({ scene, player, manaItems, hpItems });
+
+// Lưu trạng thái trước bão để khôi phục
+let originalSpawnInterval = spawnSystem.spawnIntervalSeconds;
+let originalMaxEnemies = spawnSystem.maxEnemies;
+let originalBoss2Rate = spawnSystem.boss2Rate;
+let originalGroundColor = 0x555555; // default dungeon color or what it was. Let's get it from ground material if possible. We can just hardcode or save it.
+
+function startStorm() {
+	if (player.isStormActive) return;
+
+	player.isStormActive = true;
+	player.stormTimeRemaining = 20; // 20 giây
+
+	// Save original states if this is first storm
+	originalSpawnInterval = spawnSystem.spawnIntervalSeconds;
+	originalMaxEnemies = spawnSystem.maxEnemies;
+	originalBoss2Rate = spawnSystem.boss2Rate;
+	originalGroundColor = ground.material.color.getHex();
+
+	// --- Storm Visuals ---
+	ground.material.color.setHex(0xff5533);
+
+	// --- Storm Difficulty ---
+	spawnSystem.spawnIntervalSeconds = 0.5;
+	spawnSystem.maxEnemies = 60;
+	spawnSystem.boss2Rate = 0.25;
+
+	const stormUI = document.getElementById('storm-ui');
+	if (stormUI) {
+		stormUI.style.display = 'block';
+		stormUI.innerText = `Bão Quái: 20s`;
+	}
+
+	player.updateKillUI();
+}
+
+window.addEventListener('endStorm', () => {
+	if (!player.isStormActive) return;
+
+	player.isStormActive = false;
+	player.nextStormKills = player.kills + 40; // Giết thêm 40 quái để có bão tiếp
+
+	// Khôi phục
+	ground.material.color.setHex(originalGroundColor);
+	spawnSystem.spawnIntervalSeconds = 1.5;
+	spawnSystem.maxEnemies = 20;
+	spawnSystem.boss2Rate = 0.05;
+
+	player.updateKillUI();
+});
 
 // Lắng nghe sự kiện tiêu diệt quái vật để lên Map
 window.addEventListener('enemyKilled', () => {
@@ -100,24 +151,9 @@ window.addEventListener('enemyKilled', () => {
 	
 	player.addKill();
 
-	// Chuyển Map khi đạt 20 kills và đang ở Map 1
-	if (player.kills >=  20 && player.currentLevel === 1) {
-		player.currentLevel = 2;
-		player.updateKillUI(); // Update UI label sang hệ map 2
-
-		// --- Map 2 Visuals ---
-		// Thay đổi màu sàn thành đỏ cam rực (đồ hoạ map 2)
-		ground.material.color.setHex(0xff5533); 
-
-		// --- Map 2 Difficulty ---
-		// Chuyển spawn rate nhanh hơn, x3 limit quái
-		spawnSystem.spawnIntervalSeconds = 0.5;
-		spawnSystem.maxEnemies = 60;
-		spawnSystem.boss2Rate = 0.25; // Increase boss2 spawn rate in map 2
-		// Hồi lại đầy máu khi qua map (Optional nhưng khuyến khích)
-		player.hp = player.maxHp;
-		const hpFill = document.getElementById('hp-fill');
-		if (hpFill) hpFill.style.width = "100%";
+	// Kích hoạt bão quái
+	if (!player.isStormActive && player.kills >= player.nextStormKills) {
+		startStorm();
 	}
 });
 

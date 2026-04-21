@@ -1,4 +1,4 @@
-export function createItemSystem({ scene, player, manaItems = [] }) {
+export function createItemSystem({ scene, player, manaItems = [], hpItems = [] }) {
 	const rotationSpeed = 2; // radians per sec
 	return {
 		update(dt) {
@@ -22,7 +22,22 @@ export function createItemSystem({ scene, player, manaItems = [] }) {
 					manaItems.splice(i, 1);
 				}
 			}
+
+			for (let i = hpItems.length - 1; i >= 0; i--) {
+				const item = hpItems[i];
+				item.rotation.y += rotationSpeed * dt;
+
+				// Float animation
+				item.position.y = 0.5 + Math.sin(Date.now() * 0.003 + i) * 0.1;
+
+				const dist = pPos.distanceTo(item.position);
+				if (dist < pRad + 0.4) {
+					// Collect (20 HP per drop)
+					player.addHp(20);
+					scene.remove(item);
+					hpItems.splice(i, 1);
+				}
+			}
 		}
 	};
 }
-

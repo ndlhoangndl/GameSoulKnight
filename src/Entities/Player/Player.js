@@ -18,9 +18,14 @@ export class Player extends Entity {
         this.maxMp = 100;
 
         this.kills = 0;
+        this.totalPlayTime = 0;
         this.currentLevel = 1;
 
         this.isDead = false;
+        
+        this.isStormActive = false;
+        this.stormTimeRemaining = 0;
+        this.nextStormKills = 20;
 
         this.updateManaUI(); // Initialize UI width to 0
         this.updateKillUI(); // Khởi tạo UI số lượng kill
@@ -35,12 +40,10 @@ export class Player extends Entity {
     updateKillUI() {
         const killUI = document.getElementById('kill-count-ui');
         if (killUI) {
-            if (this.currentLevel === 1) {
-                // Màn 1: Cần 20 kills
-                killUI.innerText = `Kills: ${this.kills} / 20 (Map 1)`;
+            if (this.isStormActive) {
+                killUI.innerText = `Kills: ${this.kills} (Bão Quái đang hoạt động)`;
             } else {
-                // Màn 2: Hiển thị tự do hoặc có limit tùy ý
-                killUI.innerText = `Kills: ${this.kills} (Map 2)`;
+                killUI.innerText = `Kills: ${this.kills} / ${this.nextStormKills}`;
             }
         }
     }
@@ -54,6 +57,16 @@ export class Player extends Entity {
         }
 
         // Cập nhật UI ngay lập tức khi mất máu
+        this.updateHpUI();
+    }
+
+    addHp(amount) {
+        if (this.isDead) return;
+        this.hp = Math.min(this.hp + amount, this.maxHp);
+        this.updateHpUI();
+    }
+
+    updateHpUI() {
         const hpFill = document.getElementById('hp-fill');
         if (hpFill) {
             const percentage = (this.hp / this.maxHp) * 100;
@@ -85,6 +98,26 @@ export class Player extends Entity {
 
     update(dt) {
         if (this.isDead) return;
+
+        this.totalPlayTime += dt;
+        const timeUI = document.getElementById('time-ui');
+        if (timeUI) {
+            timeUI.innerText = `Total Time: ${Math.floor(this.totalPlayTime)}s`;
+        }
+
+        if (this.isStormActive) {
+            this.stormTimeRemaining -= dt;
+            const stormUI = document.getElementById('storm-ui');
+            if (stormUI) {
+                if (this.stormTimeRemaining <= 0) {
+                    stormUI.style.display = 'none';
+                    // Trigger end storm event
+                    window.dispatchEvent(new Event('endStorm'));
+                } else {
+                    stormUI.innerText = `Bão Quái: ${Math.ceil(this.stormTimeRemaining)}s`;
+                }
+            }
+        }
 
         // Cập nhật vị trí dựa trên vận tốc  đã tính ở PlayerController
         super.update(dt);
