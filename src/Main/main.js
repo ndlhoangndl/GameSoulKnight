@@ -16,6 +16,10 @@ import { createEnemyBulletSystem } from '../game/systems/createEnemyBulletSystem
 import { createCameraFollowSystem } from '../game/systems/createCameraFollowSystem.js';
 import { createWorldBoundsSystem } from '../game/systems/createWorldBoundsSystem.js';
 import { createItemSystem } from '../game/systems/createItemSystem.js';
+
+import { setupStormLogic } from '../game/events/setupStormLogic.js';
+import { setupGameOverWatcher } from '../game/events/setupGameOverWatcher.js';
+
 import { wireGameLoop } from '../game/wireGameLoop.js';
 import { LoadingScreen } from '../UI/LoadingScreen.js';
 import { PauseButton } from '../UI/PauseButton.js';
@@ -95,67 +99,7 @@ const worldBoundsSystem = createWorldBoundsSystem({ playerMesh, bounds: worldBou
 
 const itemSystem = createItemSystem({ scene, player, manaItems, hpItems });
 
-// Lưu trạng thái trước bão để khôi phục
-let originalSpawnInterval = spawnSystem.spawnIntervalSeconds;
-let originalMaxEnemies = spawnSystem.maxEnemies;
-let originalBoss2Rate = spawnSystem.boss2Rate;
-let originalGroundColor = 0x555555; // default dungeon color or what it was. Let's get it from ground material if possible. We can just hardcode or save it.
-
-function startStorm() {
-	if (player.isStormActive) return;
-
-	player.isStormActive = true;
-	player.stormTimeRemaining = 20; // 20 giây
-
-	// Save original states if this is first storm
-	originalSpawnInterval = spawnSystem.spawnIntervalSeconds;
-	originalMaxEnemies = spawnSystem.maxEnemies;
-	originalBoss2Rate = spawnSystem.boss2Rate;
-	originalGroundColor = ground.material.color.getHex();
-
-	// --- Storm Visuals ---
-	ground.material.color.setHex(0xff5533);
-
-	// --- Storm Difficulty ---
-	spawnSystem.spawnIntervalSeconds = 0.5;
-	spawnSystem.maxEnemies = 60;
-	spawnSystem.boss2Rate = 0.25;
-
-	const stormUI = document.getElementById('storm-ui');
-	if (stormUI) {
-		stormUI.style.display = 'block';
-		stormUI.innerText = `Bão Quái: 20s`;
-	}
-
-	player.updateKillUI();
-}
-
-window.addEventListener('endStorm', () => {
-	if (!player.isStormActive) return;
-
-	player.isStormActive = false;
-	player.nextStormKills = player.kills + 40; // Giết thêm 40 quái để có bão tiếp
-
-	// Khôi phục
-	ground.material.color.setHex(originalGroundColor);
-	spawnSystem.spawnIntervalSeconds = 1.5;
-	spawnSystem.maxEnemies = 20;
-	spawnSystem.boss2Rate = 0.05;
-
-	player.updateKillUI();
-});
-
-// Lắng nghe sự kiện tiêu diệt quái vật để lên Map
-window.addEventListener('enemyKilled', () => {
-	if (player.isDead) return;
-	
-	player.addKill();
-
-	// Kích hoạt bão quái
-	if (!player.isStormActive && player.kills >= player.nextStormKills) {
-		startStorm();
-	}
-});
+setupStormLogic(player, ground, spawnSystem);
 
 // 6) Game loop
 const gameLoop = wireGameLoop({
@@ -188,34 +132,4 @@ loading.hide();
 // Pause button (top-right)
 new PauseButton({ gameLoop });
 
-// --- Game Over UI ---
-const gameOverEl = document.getElementById('game-over');
-const restartBtn = document.getElementById('btn-restart');
-
-let gameOverShown = false;
-function showGameOver() {
-	if (gameOverShown) return;
-	gameOverShown = true;
-	if (gameOverEl) {
-		gameOverEl.classList.remove('hidden');
-		gameOverEl.setAttribute('aria-hidden', 'false');
-	}
-}
-
-function restartGame() {
-	// Cách đơn giản nhất để reset toàn bộ state hiện tại.
-	window.location.reload();
-}
-
-if (restartBtn) restartBtn.addEventListener('click', restartGame);
-window.addEventListener('keydown', (e) => {
-	if (!gameOverShown) return;
-	if (e.code === 'KeyR' || e.code === 'Enter' || e.code === 'Space') restartGame();
-});
-
-// Check chết theo frame (không sửa thêm logic entity)
-function gameOverWatcher() {
-	if (player.isDead) showGameOver();
-	requestAnimationFrame(gameOverWatcher);
-}
-requestAnimationFrame(gameOverWatcher);
+setupGameOverWatcher(player);

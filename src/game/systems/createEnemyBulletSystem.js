@@ -13,11 +13,14 @@ export function createEnemyBulletSystem({ scene, enemyBullets, player, worldBoun
 					}
 				}
 
-				const distToPlayer = eb.mesh.position.distanceTo(player.mesh.position);
-				if (distToPlayer < 0.75 + eb.radius) {
-					player.takeDamage(10);
-					eb.isDead = true;
-					console.log('Player bị trúng đạn! HP:', player.hp);
+				// Check collision with player if the bullet is not yet dead
+				if (!eb.isDead) {
+					const distToPlayer = eb.mesh.position.distanceTo(player.mesh.position);
+					if (distToPlayer < 0.75 + eb.radius) {
+						player.takeDamage(10);
+						eb.isDead = true;
+						console.log('Player bị trúng đạn! HP:', player.hp);
+					}
 				}
 
 				if (eb.isDead) {
