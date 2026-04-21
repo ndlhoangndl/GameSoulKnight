@@ -1,4 +1,6 @@
-export function createBulletSystem({ scene, bullets, enemyManager, worldBounds }) {
+import * as THREE from 'three';
+
+export function createBulletSystem({ scene, bullets, enemyManager, worldBounds, manaItems = [] }) {
 	return {
 		update(dt) {
 			for (let i = bullets.length - 1; i >= 0; i--) {
@@ -17,12 +19,28 @@ export function createBulletSystem({ scene, bullets, enemyManager, worldBounds }
 					const enemy = enemyManager.enemies[j];
 					const dist = b.mesh.position.distanceTo(enemy.mesh.position);
 					if (dist < b.radius + enemy.radius) {
-						enemy.takeDamage(20);
+						// Tính sát thương dựa trên viên đạn (mặc định 20 nếu không có)
+						const damage = b.damage || 20;
+						enemy.takeDamage(damage);
+
 						b.isDead = true;
 
 						if (enemy.isDead) {
+							// Trigger global event that an enemy is killed
+							const event = new CustomEvent('enemyKilled');
+							window.dispatchEvent(event);
+
 							scene.remove(enemy.mesh);
 							enemyManager.enemies.splice(j, 1);
+
+							// Drop MP Item
+							const tGeo = new THREE.OctahedronGeometry(0.3);
+							const tMat = new THREE.MeshPhongMaterial({ color: 0x00ffff, shininess: 100 });
+							const mItem = new THREE.Mesh(tGeo, tMat);
+							mItem.position.copy(enemy.mesh.position);
+							mItem.position.y = 0.5;
+							scene.add(mItem);
+							manaItems.push(mItem);
 						}
 						break;
 					}

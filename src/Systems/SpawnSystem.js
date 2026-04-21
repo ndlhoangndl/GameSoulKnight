@@ -13,6 +13,7 @@ export class SpawnSystem {
 		// Sử dụng giá trị mặc định nếu không có opts truyền vào
 		this.spawnIntervalSeconds = opts.spawnIntervalSeconds ?? 2;
 		this.maxEnemies = opts.maxEnemies ?? 30;
+		this.boss2Rate = opts.boss2Rate ?? 0.2;
 		this.spawnTimer = 0;
 	}
 
@@ -42,9 +43,9 @@ export class SpawnSystem {
 
 		// 2. Tạo Mesh cho quái vật (sprite 2D)
 		const enemyGeo = new THREE.PlaneGeometry(2.0, 2.0);
-		// Random spawn: 80% enemy thường (boss.png, bắn 1 viên) + 20% boss2 (bắn 3 viên)
+		// Random spawn: boss2Rate boss2 (bắn 3 viên)
 		const roll = Math.random();
-		const isBoss2 = roll < 0.2;
+		const isBoss2 = roll < this.boss2Rate;
 		const texture = isBoss2 ? this.boss2Texture : this.bossTexture;
 
 		const enemyMat = new THREE.MeshBasicMaterial({

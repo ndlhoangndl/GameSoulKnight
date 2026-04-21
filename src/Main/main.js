@@ -15,6 +15,7 @@ import { createBulletSystem } from '../game/systems/createBulletSystem.js';
 import { createEnemyBulletSystem } from '../game/systems/createEnemyBulletSystem.js';
 import { createCameraFollowSystem } from '../game/systems/createCameraFollowSystem.js';
 import { createWorldBoundsSystem } from '../game/systems/createWorldBoundsSystem.js';
+import { createItemSystem } from '../game/systems/createItemSystem.js';
 import { wireGameLoop } from '../game/wireGameLoop.js';
 import { LoadingScreen } from '../UI/LoadingScreen.js';
 import { PauseButton } from '../UI/PauseButton.js';
@@ -25,9 +26,9 @@ const { scene, camera, renderer, input, textures } = createGameContext();
 // 2) World
 const dungeonTexture = createDungeonTexture({
 	seed: 1337,
-	tileCount: 14
+	tileCount: 28
 });
-createGround({ scene, texture: dungeonTexture });
+const { ground } = createGround({ scene, texture: dungeonTexture });
 
 // World bounds (tường đỏ quanh map)
 const { bounds: worldBounds } = createWorldBounds({ scene });
@@ -66,24 +67,59 @@ enemyManager.addEnemy(
 
 // 5) Systems
 const collisionSystem = new CollisionSystem(player, enemyManager);
-const spawnSystem = new SpawnSystem(scene, enemyManager, camera, textures.boss, textures.boss2, playerMesh);
+const spawnSystem = new SpawnSystem(scene, enemyManager, camera, textures.boss, textures.boss2, playerMesh, {
+	spawnIntervalSeconds: 1.5,
+	maxEnemies: 20,
+	boss2Rate: 0.05 // Reduce boss2 spawn rate in map 1
+});
 
 const bullets = [];
 const enemyBullets = [];
+const manaItems = [];
 
 createPlayerShootSystem({
 	windowTarget: window,
 	camera,
 	playerMesh,
+	player,
 	scene,
 	bullets
 });
 
-	const bulletSystem = createBulletSystem({ scene, bullets, enemyManager, worldBounds });
-	const enemyBulletSystem = createEnemyBulletSystem({ scene, enemyBullets, player, worldBounds });
+const bulletSystem = createBulletSystem({ scene, bullets, enemyManager, worldBounds, manaItems });
+const enemyBulletSystem = createEnemyBulletSystem({ scene, enemyBullets, player, worldBounds });
 const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh });
 
 const worldBoundsSystem = createWorldBoundsSystem({ playerMesh, bounds: worldBounds });
+
+const itemSystem = createItemSystem({ scene, player, manaItems });
+
+// Lắng nghe sự kiện tiêu diệt quái vật để lên Map
+window.addEventListener('enemyKilled', () => {
+	if (player.isDead) return;
+	
+	player.addKill();
+
+	// Chuyển Map khi đạt 20 kills và đang ở Map 1
+	if (player.kills >=  20 && player.currentLevel === 1) {
+		player.currentLevel = 2;
+		player.updateKillUI(); // Update UI label sang hệ map 2
+
+		// --- Map 2 Visuals ---
+		// Thay đổi màu sàn thành đỏ cam rực (đồ hoạ map 2)
+		ground.material.color.setHex(0xff5533); 
+
+		// --- Map 2 Difficulty ---
+		// Chuyển spawn rate nhanh hơn, x3 limit quái
+		spawnSystem.spawnIntervalSeconds = 0.5;
+		spawnSystem.maxEnemies = 60;
+		spawnSystem.boss2Rate = 0.25; // Increase boss2 spawn rate in map 2
+		// Hồi lại đầy máu khi qua map (Optional nhưng khuyến khích)
+		player.hp = player.maxHp;
+		const hpFill = document.getElementById('hp-fill');
+		if (hpFill) hpFill.style.width = "100%";
+	}
+});
 
 // 6) Game loop
 const gameLoop = wireGameLoop({
@@ -94,10 +130,11 @@ const gameLoop = wireGameLoop({
 	scene,
 	enemyBullets,
 	collisionSystem,
-		bulletSystem,
+	bulletSystem,
 	enemyBulletSystem,
 	cameraFollowSystem,
 	worldBoundsSystem,
+	itemSystem,
 	renderer,
 	camera
 });

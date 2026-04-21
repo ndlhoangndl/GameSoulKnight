@@ -1,53 +1,59 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <!-- favicon removed (file not present) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gamefrontend</title>
-  <link rel="stylesheet" href="/src/Main/style.css">
+    <meta charset="UTF-8"/>
+    <!-- favicon removed (file not present) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>gamefrontend</title>
+    <link rel="stylesheet" href="/src/Main/style.css">
 </head>
-<body><div id="player-ui">
-  <div class="bar-label">HP</div>
-  <div class="bar-container">
-    <div id="hp-fill"></div>
-  </div>
+<body>
+<div id="player-ui">
+    <div class="bar-label">HP</div>
+    <div class="bar-container">
+        <div id="hp-fill"></div>
+    </div>
 
-  <div class="bar-label">MP</div>
-  <div class="bar-container">
-    <div id="mana-fill"></div>
-  </div>
+    <div class="bar-label">MP</div>
+    <div class="bar-container">
+        <div id="mana-fill"></div>
+    </div>
+
+    <div class="hud-item kill-count-container">
+        <div class="bar-label" id="kill-count-ui">Kills: 0 / 20 (Map 1)</div>
+    </div>
 </div>
 
 <button id="btn-pause" class="pause-btn" type="button" aria-label="Pause" aria-pressed="false" title="Pause">
-  <span class="pause-icon" aria-hidden="true"></span>
+    <span class="pause-icon" aria-hidden="true"></span>
 </button>
 
 <div id="loading-screen" class="loading-screen" aria-hidden="true">
-  <div class="loading-topbar">
-    <div class="brand">CloudMoon</div>
-  </div>
-
-  <div class="loading-center">
-    <div class="moon"></div>
-    <div class="cloud cloud-left"></div>
-    <div class="cloud cloud-right"></div>
-  </div>
-
-  <div class="loading-footer">
-    <div class="loading-track">
-      <div id="loading-progress" class="loading-progress"></div>
-      <div id="loading-label" class="loading-label">Game will start... 0%</div>
+    <div class="loading-topbar">
+        <div class="brand">CloudMoon</div>
     </div>
-  </div>
+
+    <div class="loading-center">
+        <div class="moon"></div>
+        <div class="cloud cloud-left"></div>
+        <div class="cloud cloud-right"></div>
+    </div>
+
+    <div class="loading-footer">
+        <div class="loading-track">
+            <div id="loading-progress" class="loading-progress"></div>
+            <div id="loading-label" class="loading-label">Game will start... 0%</div>
+        </div>
+    </div>
 </div>
 
+
 <div id="game-over" class="overlay hidden" aria-hidden="true">
-  <div class="overlay-card">
-    <h1>Game Over</h1>
-    <p>Bạn đã hết máu.</p>
-    <button id="btn-restart" type="button">Chơi lại</button>
-  </div>
+    <div class="overlay-card">
+        <h1>Game Over</h1>
+        <p>Bạn đã hết máu.</p>
+        <button id="btn-restart" type="button">Chơi lại</button>
+    </div>
 </div>
 
 <div id="app"></div>

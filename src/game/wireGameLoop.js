@@ -16,6 +16,7 @@ export function wireGameLoop({
 	enemyBulletSystem,
 	cameraFollowSystem,
 	worldBoundsSystem,
+	itemSystem,
 	renderer,
 	camera
 }) {
@@ -37,7 +38,7 @@ export function wireGameLoop({
 
 			bulletSystem.update(dt);
 			enemyBulletSystem.update(dt);
-
+			if (itemSystem) itemSystem.update(dt);
 			cameraFollowSystem.update(dt);
 		},
 		() => {
@@ -45,4 +46,3 @@ export function wireGameLoop({
 		}
 	);
 }
-

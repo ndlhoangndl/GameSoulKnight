@@ -15,7 +15,7 @@ export class Enemy extends Entity {
         this.attackRange = opts.attackRange ?? 15; // khoang cach bat dau ban player
         this.fireRate = opts.fireRate ?? 1.0; // s/shot
         this.fireTimer = 0;         // Bộ đếm thời gian
-        this.bulletSpeed = opts.bulletSpeed ?? 7;       // Đạn quái bay chậm hơn đạn người một chút cho dễ né
+        this.bulletSpeed = opts.bulletSpeed ?? 10;       // Đạn quái bay chậm hơn đạn người một chút cho dễ né
 
         // Pattern bắn: 'single' | 'triple'
         this.shotPattern = opts.shotPattern ?? 'single';
