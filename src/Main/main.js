@@ -23,9 +23,22 @@ import { setupGameOverWatcher } from '../game/events/setupGameOverWatcher.js';
 import { wireGameLoop } from '../game/wireGameLoop.js';
 import { LoadingScreen } from '../UI/LoadingScreen.js';
 import { PauseButton } from '../UI/PauseButton.js';
+import { SocketManager } from '../core/SocketManager.js';
 
 // 1) Core context
 const { scene, camera, renderer, input, textures } = createGameContext();
+
+// WebSocket (Networking) - Initialize early
+const socketManager = new SocketManager();
+
+// We can catch state updates from server
+socketManager.onStateUpdate = (snapshot) => {
+    // For now just log occasionally or keep reference, will be used later
+    // to sync entities when multiplayer is fully mapped.
+};
+
+// Start connection in background
+socketManager.connect().catch(e => console.warn('Failed to connect WebSocket', e));
 
 // 2) World
 const dungeonTexture = createDungeonTexture({
@@ -41,7 +54,8 @@ const { bounds: worldBounds } = createWorldBounds({ scene });
 const { playerMesh, player, playerController } = createPlayer({
 	scene,
 	texture: textures.player,
-	input
+	input,
+	socketManager
 });
 
 // 4) Enemies
@@ -101,7 +115,7 @@ const itemSystem = createItemSystem({ scene, player, manaItems, hpItems });
 
 setupStormLogic(player, ground, spawnSystem);
 
-// 6) Game loop
+// 7) Game loop
 const gameLoop = wireGameLoop({
 	spawnSystem,
 	playerController,
