@@ -1,4 +1,3 @@
-// src/Entities/Player/Player.js
 import { Entity } from '../Base/Entity.js';
 import * as THREE from 'three';
 
@@ -6,38 +5,39 @@ export class Player extends Entity {
     constructor(mesh) {
         super({ mesh, hp: 100 });
         this.maxHp = 100;
-        this.isDead = false;
-        // Khởi tạo vector đích để hứng dữ liệu từ SocketManager dội về
+        // Vector đích để lerp mượt từ server
         this.targetPosition = new THREE.Vector3(0, 0.5, 0);
+
+        // Callback để UI layer lắng nghe thay đổi HP — tránh entity biết về DOM
+        this.onHpChanged = null;
     }
 
-    updateStats(stats) {
-        if (!stats) return;
-        if (stats.hp !== undefined) {
-            this.hp = stats.hp;
+    // Gộp updateStats + sync thành một điểm vào duy nhất
+    // SocketManager đang gọi cả hai — giờ chỉ cần gọi sync()
+    sync(serverX, serverY, hp) {
+        if (hp !== undefined) {
+            this.hp = hp;
             if (this.hp <= 0 && !this.isDead) {
                 this.hp = 0;
                 this.isDead = true;
             }
-            this.updateHpUI();
+            // Thông báo cho UI thay vì tự thao tác DOM
+            if (this.onHpChanged) this.onHpChanged(this.hp, this.maxHp);
         }
     }
 
-    updateHpUI() {
-        const hpFill = document.getElementById('hp-fill');
-        if (hpFill) {
-            const percentage = (this.hp / this.maxHp) * 100;
-            hpFill.style.width = percentage + "%";
+    // Giữ lại updateStats để SocketManager gọi được (tránh phá luồng hiện tại)
+    updateStats(stats) {
+        if (!stats) return;
+        if (stats.hp !== undefined) {
+            this.sync(undefined, undefined, stats.hp);
         }
     }
 
     update(dt) {
         if (this.isDead) return;
-
-        // ĐƯA VỀ 2D CHẠY BÌNH THƯỜNG:
-        // Đọc trực tiếp tọa độ đích từ Server tính toán dội về và gán thẳng vào mesh vị trí hiện tại
         if (this.targetPosition) {
-            this.mesh.position.copy(this.targetPosition);
+            this.mesh.position.lerp(this.targetPosition, 15 * dt);
         }
     }
 }

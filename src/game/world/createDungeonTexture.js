@@ -11,10 +11,7 @@ function mulberry32(seed) {
 	};
 }
 
-/**
- * Tạo texture kiểu dungeon (gạch đá + vết nứt + vignette) hoàn toàn procedural.
- * Không cần file ảnh map.jpg/png.
- */
+
 export function createDungeonTexture({
 	size = 1024,
 	seed = 1337,
