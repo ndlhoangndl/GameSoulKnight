@@ -1,29 +1,19 @@
 import * as THREE from 'three';
 import { EnemyManager } from '../Entities/Enemy/EnemyManager.js';
-import { CollisionSystem } from '../Systems/Collision.js';
-import { SpawnSystem } from '../Systems/SpawnSystem.js';
+import { BulletManager } from '../Entities/BulletManager.js';
 
 import { createGameContext } from '../game/bootstrap/createGameContext.js';
-import { createGround } from '../game/world/createGround.js';
-import { createWorldBounds } from '../game/world/createWorldBounds.js';
-import { createDungeonTexture } from '../game/world/createDungeonTexture.js';
+import { WorldSystem } from '../game/world/createWorldBounds.js';
 import { createPlayer } from '../game/factories/createPlayer.js';
-import { createEnemy } from '../game/factories/createEnemy.js';
 
-import { createPlayerShootSystem } from '../game/systems/createPlayerShootSystem.js';
-import { createBulletSystem } from '../game/systems/createBulletSystem.js';
-import { createEnemyBulletSystem } from '../game/systems/createEnemyBulletSystem.js';
 import { createCameraFollowSystem } from '../game/systems/createCameraFollowSystem.js';
-import { createWorldBoundsSystem } from '../game/systems/createWorldBoundsSystem.js';
-import { createItemSystem } from '../game/systems/createItemSystem.js';
-
-import { setupStormLogic } from '../game/events/setupStormLogic.js';
-import { setupGameOverWatcher } from '../game/events/setupGameOverWatcher.js';
 
 import { wireGameLoop } from '../game/wireGameLoop.js';
 import { LoadingScreen } from '../UI/LoadingScreen.js';
 import { PauseButton } from '../UI/PauseButton.js';
 import { SocketManager } from '../core/SocketManager.js';
+import { MapRenderer } from '../game/systems/MapRenderer.js';
+import { EntityManager } from '../game/systems/EntityManager.js';
 
 // 1) Core context
 const { scene, camera, renderer, input, textures } = createGameContext();
@@ -32,23 +22,23 @@ const { scene, camera, renderer, input, textures } = createGameContext();
 const socketManager = new SocketManager();
 
 // We can catch state updates from server
-socketManager.onStateUpdate = (snapshot) => {
+socketManager.onStateUpdate = () => {
     // For now just log occasionally or keep reference, will be used later
     // to sync entities when multiplayer is fully mapped.
 };
 
-// Start connection in background
-socketManager.connect().catch(e => console.warn('Failed to connect WebSocket', e));
-
 // 2) World
-const dungeonTexture = createDungeonTexture({
-	seed: 1337,
-	tileCount: 28
-});
-const { ground } = createGround({ scene, texture: dungeonTexture });
+const textureLoader = new THREE.TextureLoader();
+const mapTexture = textureLoader.load('/map.jpg');
 
-// World bounds (tường đỏ quanh map)
-const { bounds: worldBounds } = createWorldBounds({ scene });
+// Tạo ground cũ bị vô hiệu hóa vì chúng ta xây map theo Tile của BE
+// createGround({ scene, texture: mapTexture, size: 2000 });
+
+// Sử dụng texture cũ cho sàn để design khớp với base map BE
+const floorTextures = { floor: mapTexture };
+
+// World bounds
+const worldSystem = new WorldSystem(scene, floorTextures);
 
 // 3) Player
 const { playerMesh, player, playerController } = createPlayer({
@@ -58,79 +48,69 @@ const { playerMesh, player, playerController } = createPlayer({
 	socketManager
 });
 
-// 4) Enemies
-const enemyManager = new EnemyManager();
+// Click chuột gọi thẳng API Shoot của Server
+window.addEventListener('mousedown', (e) => {
+    if (e.button === 0) { // Chuột trái
+        socketManager.sendShoot();
+    }
+});
 
-// Enemy 1 (cũ): boss.png, bắn 1 viên
-enemyManager.addEnemy(
-	createEnemy({
-		scene,
-		camera,
-		variant: 'boss1',
-		texture: textures.boss,
-		position: new THREE.Vector3(10, 0.25, -10)
-	})
-);
+// 4) Entities Managers
+const enemyManager = new EnemyManager(scene, { boss: textures.boss, boss2: textures.boss2 });
+const bulletManager = new BulletManager(scene);
 
-// Enemy 2 (mới): boss2.png, bắn 3 viên
-enemyManager.addEnemy(
-	createEnemy({
-		scene,
-		camera,
-		variant: 'boss2',
-		texture: textures.boss2,
-		position: new THREE.Vector3(-10, 0.25, -10)
-	})
-);
+const mapRenderer = new MapRenderer(scene);
+const entityManager = new EntityManager(scene, camera, textures.boss);
+
+// Update SocketManager references
+socketManager.game = {
+    worldSystem,
+    player,
+    enemyManager,
+    bulletManager,
+    mapRenderer,
+    entityManager
+};
+
+// NOW start connection, so it doesn't miss the first RoomSwitch
+socketManager.connect().catch(e => {
+    console.warn('Failed to connect WebSocket', e);
+    // Nếu rớt lạng kết nối thì mock dữ liệu map tĩnh cho ông ý xem thử Map Renderer có hoạt động không
+    mapRenderer.render([
+        0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+        2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0
+    ], 16, 16);
+});
 
 // 5) Systems
-const collisionSystem = new CollisionSystem(player, enemyManager);
-const spawnSystem = new SpawnSystem(scene, enemyManager, camera, textures.boss, textures.boss2, playerMesh, {
-	spawnIntervalSeconds: 1.5,
-	maxEnemies: 20,
-	boss2Rate: 0.05 // Reduce boss2 spawn rate in map 1
-});
-
-const bullets = [];
-const enemyBullets = [];
-const manaItems = [];
-const hpItems = [];
-
-createPlayerShootSystem({
-	windowTarget: window,
-	camera,
-	playerMesh,
-	player,
-	scene,
-	bullets
-});
-
-const bulletSystem = createBulletSystem({ scene, bullets, enemyManager, worldBounds, manaItems, hpItems });
-const enemyBulletSystem = createEnemyBulletSystem({ scene, enemyBullets, player, worldBounds });
 const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh });
-
-const worldBoundsSystem = createWorldBoundsSystem({ playerMesh, bounds: worldBounds });
-
-const itemSystem = createItemSystem({ scene, player, manaItems, hpItems });
-
-setupStormLogic(player, ground, spawnSystem);
 
 // 7) Game loop
 const gameLoop = wireGameLoop({
-	spawnSystem,
-	playerController,
-	player,
-	enemyManager,
-	scene,
-	enemyBullets,
-	collisionSystem,
-	bulletSystem,
-	enemyBulletSystem,
-	cameraFollowSystem,
-	worldBoundsSystem,
-	itemSystem,
-	renderer,
-	camera
+        playerController,
+        player,
+        enemyManager,
+        scene,
+        cameraFollowSystem,
+        renderer,
+        camera,
+        mapRenderer,
+        entityManager,
+        bulletManager
 });
 
 // --- Loading on entry (UI only) ---
@@ -145,5 +125,3 @@ loading.hide();
 
 // Pause button (top-right)
 new PauseButton({ gameLoop });
-
-setupGameOverWatcher(player);

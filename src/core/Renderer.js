@@ -9,5 +9,9 @@ export class Renderer extends THREE.WebGLRenderer {
         this.setPixelRatio(window.devicePixelRatio);
 
         document.body.appendChild(this.domElement);
+
+        window.addEventListener('resize', () => {
+            this.setSize(window.innerWidth, window.innerHeight);
+        });
     }
 }

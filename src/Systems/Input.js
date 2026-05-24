@@ -19,6 +19,15 @@ export class Input {
                 e.preventDefault();
             }
             this.keys[e.code] = false;
+
+            // Xử lý bật tắt World Map khi nhấn phím M hoặc Tab (thả phím)
+            if (e.code === 'KeyM' || e.code === 'Tab') {
+                e.preventDefault();
+                const worldMapUI = document.getElementById('world-map-ui');
+                if (worldMapUI) {
+                    worldMapUI.classList.toggle('hidden');
+                }
+            }
         }, { passive: false });
     }
 

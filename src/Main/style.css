@@ -1,3 +1,13 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #000;
+}
+
+canvas {
+    display: block;
+}
+
 #player-ui {
     position: fixed;
     top: 20px;
@@ -268,4 +278,85 @@
     pointer-events: none;
 }
 
+/* --- World Map UI --- */
+.world-map-card {
+    width: 400px;
+    background: rgba(20, 20, 20, 0.95);
+    border: 2px solid #555;
+    border-radius: 12px;
+    padding: 20px;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+}
 
+.world-map-card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #ffcc00;
+}
+
+.map-container {
+    position: relative;
+    width: 320px;
+    height: 220px;
+    margin: 0 auto;
+    background: #111;
+    border-radius: 8px;
+    border: 1px inset #333;
+    overflow: hidden;
+}
+
+.map-edges {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.map-edges line {
+    stroke: #555;
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.map-node {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #333;
+    border: 2px solid #777;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: #aaa;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+}
+
+.map-node.active {
+    background: #ffaa00;
+    border-color: #ffffff;
+    color: #000;
+    box-shadow: 0 0 15px #ffaa00, 0 0 5px #ffaa00 inset;
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+/* Positions of nodes matched with SVG lines */
+.node-3 { top: 60px; left: 60px; }
+.node-5 { top: 60px; left: 260px; }
+.node-1 { top: 160px; left: 60px; }
+.node-2 { top: 160px; left: 160px; }
+.node-4 { top: 160px; left: 260px; }
+
+.map-guide {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #aaa;
+}

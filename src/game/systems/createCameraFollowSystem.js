@@ -1,15 +1,19 @@
+// src/game/systems/createCameraFollowSystem.js
 import * as THREE from 'three';
 
-
 export function createCameraFollowSystem({ camera, targetMesh }) {
-	// Soul Knight-ish top-down: high Y, almost no Z offset.
-	const offset = new THREE.Vector3(0, 15, 0.01);
+	// Đặt Camera ở độ cao 25 nhìn vuông góc trục đứng thẳng xuống sàn nhà chuẩn góc 2D
+	const offset = new THREE.Vector3(0, 25, 0);
 
 	return {
-		update() {
+		update(dt) {
+			if (!targetMesh) return;
+
+			// Camera di chuyển tịnh tiến đồng bộ theo tâm Player
 			camera.position.copy(targetMesh.position).add(offset);
-			camera.lookAt(targetMesh.position.x, 0, targetMesh.position.z);
+
+			// Khóa chặt hướng nhìn vuông góc từ trên xuống
+			camera.lookAt(targetMesh.position.x, targetMesh.position.y, targetMesh.position.z);
 		}
 	};
 }
-

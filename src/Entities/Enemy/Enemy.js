@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { Entity } from '../Base/Entity.js'
-import { Bullet } from '../Bullet.js'
 
 const HP_BAR_WIDTH = 1.5
 const HP_BAR_HEIGHT = 0.2
@@ -61,45 +60,6 @@ export class Enemy extends Entity {
         this.hpBar.position.x = (1 - healthPercent) * -(HP_BAR_WIDTH / 2);
     }
 
-    // --- Hàm bắn đạn ---
-    shoot(targetPosition, scene, enemyBullets) {
-        if (this.shotPattern === 'triple') {
-            this.shootTriple(targetPosition, scene, enemyBullets);
-            return;
-        }
-
-        const direction = new THREE.Vector3();
-        direction.subVectors(targetPosition, this.mesh.position).normalize();
-        direction.y = 0; // Bắn ngang mặt đất
-        this.spawnBullet(direction, scene, enemyBullets);
-    }
-
-    shootTriple(targetPosition, scene, enemyBullets) {
-        const baseDir = new THREE.Vector3();
-        baseDir.subVectors(targetPosition, this.mesh.position).normalize();
-        baseDir.y = 0;
-        if (baseDir.lengthSq() <= 0.0001) return;
-
-        // 3 hướng: giữa, lệch trái, lệch phải
-        const dirs = [
-            baseDir.clone(),
-            baseDir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), -this.spreadAngle),
-            baseDir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), this.spreadAngle)
-        ];
-        for (const d of dirs) this.spawnBullet(d, scene, enemyBullets);
-    }
-
-    spawnBullet(direction, scene, enemyBullets) {
-        // Tạo mesh viên đạn quái (Màu đỏ/cam để phân biệt)
-        const bulletGeo = new THREE.SphereGeometry(0.2, 8, 8);
-        const bulletMat = new THREE.MeshBasicMaterial({ color: 0xff5500 });
-        const bulletMesh = new THREE.Mesh(bulletGeo, bulletMat);
-        bulletMesh.position.copy(this.mesh.position);
-        scene.add(bulletMesh);
-
-        const bullet = new Bullet(bulletMesh, direction, this.bulletSpeed);
-        enemyBullets.push(bullet);
-    }
     takeDamage(amount) {
         if (this.isDead) return;
 
@@ -116,34 +76,15 @@ export class Enemy extends Entity {
         this.billboardCamera = camera;
     }
 
-    update(dt, player, scene, enemyBullets) {
+    update(dt) {
         if (this.isDead) return;
-
-    // 0. Di chuyển đuổi theo Player (chase)
-    const moveDir = player.mesh.position.clone().sub(this.mesh.position);
-    moveDir.y = 0;
-    if (moveDir.lengthSq() > 0.0001) {
-      moveDir.normalize();
-      // tốc độ đơn giản (có thể đưa ra Constants nếu muốn)
-      this.velocity.copy(moveDir).multiplyScalar(3);
-    } else {
-      this.velocity.set(0, 0, 0);
-    }
 
         // 1. Billboard: luôn nhìn về hướng camera (kiểu 2D)
         if (this.billboardCamera) {
             this.mesh.quaternion.copy(this.billboardCamera.quaternion);
         }
 
-        // 2. Logic Bắn đạn
-        const distance = this.mesh.position.distanceTo(player.mesh.position);
-        if (distance <= this.attackRange) {
-            this.fireTimer += dt;
-            if (this.fireTimer >= this.fireRate) {
-                this.shoot(player.mesh.position, scene, enemyBullets);
-                this.fireTimer = 0;
-            }
-        }
+        // Không xử lý logic đuổi và bắn đạn trên FE nữa vì hệ thống Backend đã đảm nhiệm phần tính toán và đồng bộ vị trí, máu và đạn thông qua SocketManager.
 
         // 3. Thanh máu top-down: đã xoay nằm ngang ngay từ đầu, không cần copy quaternion theo camera
 

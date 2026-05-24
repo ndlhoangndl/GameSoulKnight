@@ -1,36 +1,54 @@
-import { Enemy } from './Enemy.js'
+import * as THREE from 'three';
 
 export class EnemyManager {
-    constructor() {
-        // Danh sách lưu trữ tất cả quái vật đang sống
-        this.enemies = [];
+    constructor(scene, textureDict) {
+        this.enemies = new Map();
+        this.scene = scene;
+        this.textureDict = textureDict;
     }
 
-    // Hàm để thêm một con quái mới vào sân
-    addEnemy(enemy) {
-        this.enemies.push(enemy);
+    update(dt) {
+        for (const [id, enemy] of this.enemies.entries()) {
+            // Để trống hoặc giữ nguyên logic nhìn camera của ông
+        }
     }
 
-    // Cập nhật tất cả quái vật cùng một lúc
-    update(dt, player) {
-        // Duyệt qua từng con quái trong danh sách
-        for (let i = this.enemies.length - 1; i >= 0; i--) {
-            const enemy = this.enemies[i];
+    syncWithServer(spawnDataList, scale = 32) { // Thêm tham số scale nhận từ SocketManager
+        if (!spawnDataList) return;
 
-            // Nếu quái đã chết, loại bỏ khỏi danh sách
-            if (enemy.isDead) {
-                this.enemies.splice(i, 1);
-                continue;
+        const currentIds = new Set();
+
+        spawnDataList.forEach(data => {
+            const enemyId = data.Id || `${data.X}_${data.Y}`;
+            currentIds.add(enemyId);
+
+            if (!this.enemies.has(enemyId)) {
+                const geometry = new THREE.PlaneGeometry(2, 2);
+                const material = new THREE.MeshBasicMaterial({
+                    map: this.textureDict?.boss || null,
+                    transparent: true
+                });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.rotation.x = -Math.PI / 2;
+
+                this.scene.add(mesh);
+                this.enemies.set(enemyId, { mesh, hp: data.CurrentHp });
             }
 
-            // Tính toán hướng từ Quái -> Player
-            const direction = player.mesh.position.clone().sub(enemy.mesh.position).normalize();
+            const enemy = this.enemies.get(enemyId);
 
-            // Cập nhật vận tốc cho quái (tốc độ ví dụ là 3)
-            enemy.velocity.copy(direction).multiplyScalar(3);
+            // SỬA TẠI ĐÂY: Chia tọa độ X, Y cho scale (32) để quái đứng đúng ô lưới trên map
+            enemy.mesh.position.set(data.X / scale, 0.25, data.Y / scale);
+            enemy.hp = data.CurrentHp;
+        });
 
-            // Gọi hàm update của từng con quái
-            enemy.update(dt);
+        for (const [id, enemy] of this.enemies.entries()) {
+            if (!currentIds.has(id)) {
+                this.scene.remove(enemy.mesh);
+                enemy.mesh.geometry.dispose();
+                enemy.mesh.material.dispose();
+                this.enemies.delete(id);
+            }
         }
     }
 }

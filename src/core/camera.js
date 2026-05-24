@@ -9,5 +9,10 @@ export class Camera extends THREE.PerspectiveCamera {
         this.position.set(0, 25, 0.01);
         this.up.set(0, 0, -1);
         this.lookAt(0, 0, 0);
+
+        window.addEventListener('resize', () => {
+            this.aspect = window.innerWidth / window.innerHeight;
+            this.updateProjectionMatrix();
+        });
     }
 }
