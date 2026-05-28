@@ -4,6 +4,7 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
     "types": ["vite/client"],
     "skipLibCheck": true,
     "allowJs": true,
@@ -23,5 +24,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src/**/*.js"]
+  "include": ["src/**/*.js", "src/**/*.jsx"]
 }

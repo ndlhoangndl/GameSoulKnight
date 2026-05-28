@@ -21,7 +21,6 @@ export function createGameContext() {
 
 	const textures = {
 		player: loader.load(ASSET_URLS.player),
-		map: loader.load(ASSET_URLS.map),
 		boss: loader.load(ASSET_URLS.boss),
 		boss2: loader.load(ASSET_URLS.boss2)
 	};

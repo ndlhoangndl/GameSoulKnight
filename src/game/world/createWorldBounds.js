@@ -119,8 +119,7 @@ export class WorldSystem {
 		this.wallGeo = new THREE.BoxGeometry(this.tileSize, 2, this.tileSize);
 		this.floorGeo = new THREE.PlaneGeometry(this.tileSize, this.tileSize);
 
-		// Dựng tạm một cái map mặc định không thì màn hình bị đen thui
-		this.buildDefaultMap();
+		// Không dựng map placeholder: map sẽ do RoomSwitch/MapRenderer dựng.
 	}
 
 	buildDefaultMap() {

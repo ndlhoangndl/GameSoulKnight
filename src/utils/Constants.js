@@ -1,7 +1,6 @@
 // Nơi tập trung tất cả các thông số có thể điều chỉnh của game.
 
 export const ASSET_URLS = {
-	map: '/map.jpg',
 	player: '/Player.png',
 	boss: '/boss.png',
 	boss2: '/boss2.png'

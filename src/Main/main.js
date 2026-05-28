@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { EnemyManager } from '../Entities/Enemy/EnemyManager.js';
 import { BulletManager } from '../Entities/BulletManager.js';
 
@@ -12,6 +11,7 @@ import { PauseButton } from '../UI/PauseButton.js';
 import { SocketManager } from '../core/SocketManager.js';
 import { MapRenderer } from '../game/systems/MapRenderer.js';
 import { EntityManager } from '../game/systems/EntityManager.js';
+import { MAP_1_HEIGHT, MAP_1_TILES, MAP_1_WIDTH } from '../game/maps/map1.js';
 
 // 1) Core context
 const { scene, camera, renderer, input, textures } = createGameContext();
@@ -45,7 +45,8 @@ window.addEventListener('mousedown', onMouseDown);
 // 5) Entities
 const enemyManager = new EnemyManager(scene, { boss: textures.boss, boss2: textures.boss2 });
 const bulletManager = new BulletManager(scene);
-const mapRenderer = new MapRenderer(scene);
+// Make tiles larger so the map appears bigger on screen (adjustable)
+const mapRenderer = new MapRenderer(scene, { tileSize: 3 });
 const entityManager = new EntityManager(scene, camera, textures.boss);
 
 // 6) Gán references cho SocketManager
@@ -62,28 +63,11 @@ socketManager.game = {
 socketManager.connect().catch(e => {
     console.warn('Failed to connect WebSocket', e);
     // Fallback: render map tĩnh để test khi không có server
-    mapRenderer.render([
-        0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-        2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0
-    ], 16, 16);
+    mapRenderer.render(MAP_1_TILES, MAP_1_WIDTH, MAP_1_HEIGHT);
 });
 
 // 8) Systems
-const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh });
+const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh, mapRenderer });
 
 // 9) Game loop
 const gameLoop = wireGameLoop({

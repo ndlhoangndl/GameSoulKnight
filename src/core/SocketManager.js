@@ -77,7 +77,17 @@ export class SocketManager {
         }
 
         if (this.game?.mapRenderer) {
-            this.game.mapRenderer.render(data.Tiles, data.Width, data.Height);
+            const tiles = data.Tiles || [];
+            const width = data.Width ?? 0;
+            const height = data.Height ?? 0;
+            const tileSizeRaw = data.TileSize ?? data.tileSize;
+            const tileSize = tileSizeRaw ? tileSizeRaw / SERVER_SCALE : undefined;
+
+            const doorCount = tiles.filter(t => t === 2).length;
+            const wallCount = tiles.filter(t => t === 0).length;
+            console.log('Room tiles', { width, height, tileSize, wallCount, doorCount });
+
+            this.game.mapRenderer.render(tiles, width, height, tileSize);
         }
     }
 
