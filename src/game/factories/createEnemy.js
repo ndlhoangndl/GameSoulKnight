@@ -4,7 +4,8 @@ import { Enemy } from '../../Entities/Enemy/Enemy.js';
 
 export function createEnemy({ scene, camera, variant, texture, position }) {
 	if (variant === 'boss2') {
-		const boss2Geo = new THREE.PlaneGeometry(2.4, 2.4);
+		// Kích thước boss cân bằng (1.2)
+		const boss2Geo = new THREE.PlaneGeometry(1.2, 1.2);
 		const boss2Mat = new THREE.MeshBasicMaterial({
 			map: texture,
 			transparent: true,
@@ -26,8 +27,8 @@ export function createEnemy({ scene, camera, variant, texture, position }) {
 		return enemy;
 	}
 
-	// boss1 (cũ)
-	const enemyGeo = new THREE.PlaneGeometry(2.0, 2.0);
+	// boss1 (cũ) - Giờ làm quái thường (0.8)
+	const enemyGeo = new THREE.PlaneGeometry(0.8, 0.8);
 	const enemyMat = new THREE.MeshBasicMaterial({
 		map: texture,
 		transparent: true,

@@ -7,7 +7,7 @@ export const ASSET_URLS = {
 };
 
 // Tỷ lệ quy đổi tọa độ: 1 đơn vị FE = SERVER_SCALE pixel BE
-export const SERVER_SCALE = 32;
+export const SERVER_SCALE = 64;
 
 export const GAME_CONSTANTS = {
 	loop: {

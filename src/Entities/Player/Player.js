@@ -6,7 +6,7 @@ export class Player extends Entity {
         super({ mesh, hp: 100 });
         this.maxHp = 100;
         // Vector đích để lerp mượt từ server
-        this.targetPosition = new THREE.Vector3(0, 0.5, 0);
+        this.targetPosition = new THREE.Vector3(0, 0.25, 0);
 
         // Callback để UI layer lắng nghe thay đổi HP — tránh entity biết về DOM
         this.onHpChanged = null;
@@ -37,7 +37,13 @@ export class Player extends Entity {
     update(dt) {
         if (this.isDead) return;
         if (this.targetPosition) {
-            this.mesh.position.lerp(this.targetPosition, 15 * dt);
+            // Tăng tốc độ lerp lên 24 để đuổi kịp vị trí server nhanh và mượt hơn
+            this.mesh.position.lerp(this.targetPosition, 24 * dt);
+            
+            // Snap thẳng vị trí nếu khoảng cách rất nhỏ để tránh rung lắc
+            if (this.mesh.position.distanceToSquared(this.targetPosition) < 0.0001) {
+                this.mesh.position.copy(this.targetPosition);
+            }
         }
     }
 }

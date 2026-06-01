@@ -1,7 +1,8 @@
 body {
     margin: 0;
     overflow: hidden;
-    background: #000;
+    background: #030712; /* Dark slate background */
+    font-family: 'Outfit', sans-serif;
 }
 
 canvas {
@@ -10,43 +11,57 @@ canvas {
 
 #player-ui {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 24px;
+    left: 24px;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #444;
+    background: rgba(17, 24, 39, 0.75); /* Premium glassmorphism */
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 18px;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    width: 240px;
 }
 
 .bar-label {
-    color: white;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 2px;
+    color: #e5e7eb;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    letter-spacing: 0.12em;
+    display: flex;
+    justify-content: space-between;
+    text-transform: uppercase;
 }
 
 .bar-container {
-    width: 200px;
-    height: 12px;
-    background: #333;
-    border: 1px solid #000;
-    margin-bottom: 8px;
+    width: 100%;
+    height: 14px;
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5) inset;
 }
 
 #hp-fill {
     width: 100%;
     height: 100%;
-    background: #ff4d4d;
-    transition: width 0.3s ease-out;
+    background: linear-gradient(90deg, #f43f5e, #e11d48); /* Vibrant neon rose-red */
+    border-radius: 9999px;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 12px rgba(225, 29, 72, 0.6);
 }
 
 #mana-fill {
     width: 100%;
     height: 100%;
-    background: #33ccff;
-    transition: width 0.3s ease-out;
+    background: linear-gradient(90deg, #06b6d4, #0891b2); /* Neon cyan */
+    border-radius: 9999px;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
 }
 
 /* --- Pause button (top-right) --- */
@@ -270,31 +285,36 @@ canvas {
     inset: 0;
     display: grid;
     place-items: center;
-    color: rgba(255, 255, 255, 0.92);
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 13px;
+    color: rgba(255, 255, 255, 0.95);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
     font-weight: 700;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
     pointer-events: none;
 }
 
 /* --- World Map UI --- */
 .world-map-card {
-    width: 400px;
-    background: rgba(20, 20, 20, 0.95);
-    border: 2px solid #555;
-    border-radius: 12px;
-    padding: 20px;
-    color: #fff;
-    font-family: 'Courier New', Courier, monospace;
+    width: 420px;
+    background: rgba(17, 24, 39, 0.92); /* Glassmorphism */
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 24px;
+    color: #f3f4f6;
+    font-family: 'Outfit', sans-serif;
     text-align: center;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
 .world-map-card h2 {
     margin-top: 0;
     margin-bottom: 20px;
-    color: #ffcc00;
+    color: #fbbf24; /* Neon Gold */
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
 }
 
 .map-container {
@@ -302,10 +322,11 @@ canvas {
     width: 320px;
     height: 220px;
     margin: 0 auto;
-    background: #111;
-    border-radius: 8px;
-    border: 1px inset #333;
+    background: rgba(10, 15, 30, 0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) inset;
 }
 
 .map-edges {
@@ -318,45 +339,58 @@ canvas {
 }
 
 .map-edges line {
-    stroke: #555;
+    stroke: rgba(251, 191, 36, 0.25); /* Glowing connector lines */
     stroke-width: 3;
     stroke-linecap: round;
+    filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.5));
 }
 
 .map-node {
     position: absolute;
-    width: 40px;
-    height: 40px;
-    background: #333;
-    border: 2px solid #777;
-    border-radius: 6px;
+    width: 42px;
+    height: 42px;
+    background: rgba(31, 41, 55, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%; /* Rounded circular nodes */
     display: grid;
     place-items: center;
+    font-family: 'Share Tech Mono', monospace;
     font-weight: bold;
-    font-size: 18px;
-    color: #aaa;
+    font-size: 16px;
+    color: #9ca3af;
     transform: translate(-50%, -50%);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
 }
 
 .map-node.active {
-    background: #ffaa00;
+    background: #fbbf24; /* Glowing active node */
     border-color: #ffffff;
-    color: #000;
-    box-shadow: 0 0 15px #ffaa00, 0 0 5px #ffaa00 inset;
-    transform: translate(-50%, -50%) scale(1.15);
+    color: #030712;
+    box-shadow: 0 0 20px #fbbf24, 0 0 8px rgba(255,255,255,0.8) inset;
+    transform: translate(-50%, -50%) scale(1.2);
+    animation: activePulse 2s infinite ease-in-out;
 }
 
-/* Positions of nodes matched with SVG lines */
-.node-3 { top: 60px; left: 60px; }
-.node-5 { top: 60px; left: 260px; }
-.node-1 { top: 160px; left: 60px; }
-.node-2 { top: 160px; left: 160px; }
-.node-4 { top: 160px; left: 260px; }
+@keyframes activePulse {
+    0%, 100% {
+        box-shadow: 0 0 15px #fbbf24, 0 0 8px rgba(255,255,255,0.8) inset;
+    }
+    50% {
+        box-shadow: 0 0 28px #fbbf24, 0 0 12px rgba(255,255,255,0.9) inset;
+    }
+}
 
 .map-guide {
     margin-top: 20px;
-    font-size: 14px;
-    color: #aaa;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: #9ca3af;
+    letter-spacing: 0.05em;
 }
+.node-4 { top: 30px; left: 160px; }
+.node-2 { top: 110px; left: 60px; }
+.node-1 { top: 110px; left: 160px; }
+.node-3 { top: 110px; left: 260px; }
+.node-5 { top: 190px; left: 160px; }

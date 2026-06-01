@@ -6,8 +6,8 @@ export class BulletManager {
         this.scene = scene;
         this.bullets = new Map();
 
-        // Geometry / Material dùng chung để tối ưu
-        this.bulletGeo = new THREE.SphereGeometry(0.3, 8, 8);
+        // Geometry / Material dùng chung để tối ưu (giảm bán kính đạn xuống 0.12 để nhìn thon gọn, nhanh nhạy)
+        this.bulletGeo = new THREE.SphereGeometry(0.12, 8, 8);
         this.bulletMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
     }
 

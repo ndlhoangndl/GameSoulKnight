@@ -110,9 +110,9 @@ export class MapRenderer {
             const col = i % width;
             const row = Math.floor(i / width);
 
-            // Center the map at world origin so player & entities align naturally
-            const posX = (col - width / 2 + 0.5) * tileSize;
-            const posZ = (row - height / 2 + 0.5) * tileSize;
+            // Căn chỉnh trục Z trực tiếp để khớp với toạ độ của Server và Player
+            const posX = (col + 0.5) * tileSize;
+            const posZ = (row + 0.5) * tileSize;
 
             // Always draw a floor tile so walls/doors sit on top and don't look like void.
             const floorMat = (row + col) % 3 === 0 ? this.floorMaterialAlt : this.floorMaterial;
@@ -139,12 +139,12 @@ export class MapRenderer {
         const widthWorld = this.mapWidth * this.tileSize;
         const heightWorld = this.mapHeight * this.tileSize;
         return {
-            minX: -widthWorld / 2,
-            maxX: widthWorld / 2,
-            minZ: -heightWorld / 2,
-            maxZ: heightWorld / 2,
-            centerX: 0,
-            centerZ: 0,
+            minX: 0,
+            maxX: widthWorld,
+            minZ: 0,
+            maxZ: heightWorld,
+            centerX: widthWorld / 2,
+            centerZ: heightWorld / 2,
             widthWorld,
             heightWorld
         };

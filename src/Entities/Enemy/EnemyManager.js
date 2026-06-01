@@ -20,25 +20,34 @@ export class EnemyManager {
         const currentIds = new Set();
 
         spawnDataList.forEach(data => {
-            const enemyId = data.Id || `${data.X}_${data.Y}`;
-            currentIds.add(enemyId);
+            const idVal = data.Id !== undefined ? data.Id : data.id;
+            const xVal = data.X !== undefined ? data.X : data.x;
+            const yVal = data.Y !== undefined ? data.Y : data.y;
+            const typeVal = data.Type || data.type;
+            const currentHpVal = data.CurrentHp !== undefined ? data.CurrentHp : data.currentHp;
 
-            if (!this.enemies.has(enemyId)) {
+            const id = idVal || `${xVal}_${yVal}`;
+            currentIds.add(id);
+
+            if (!this.enemies.has(id)) {
                 // Chọn texture theo type nếu có, fallback về boss
-                const texture = this.textureDict?.[data.Type] ?? this.textureDict?.boss ?? null;
+                const texture = this.textureDict?.[typeVal] ?? this.textureDict?.boss ?? null;
 
-                const geometry = new THREE.PlaneGeometry(2, 2);
+                // Chọn size cân bằng với map (boss to hơn quái thường)
+                const isBoss = (typeVal && (typeVal.toLowerCase().includes('boss') || typeVal.toLowerCase().includes('giant')));
+                const size = isBoss ? 1.2 : 0.8;
+                const geometry = new THREE.PlaneGeometry(size, size);
                 const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.rotation.x = -Math.PI / 2;
 
                 this.scene.add(mesh);
-                this.enemies.set(enemyId, { mesh, hp: data.CurrentHp });
+                this.enemies.set(id, { mesh, hp: currentHpVal });
             }
 
-            const enemy = this.enemies.get(enemyId);
-            enemy.mesh.position.set(data.X / SERVER_SCALE, 0.25, data.Y / SERVER_SCALE);
-            enemy.hp = data.CurrentHp;
+            const enemy = this.enemies.get(id);
+            enemy.mesh.position.set(xVal / SERVER_SCALE, 0.25, yVal / SERVER_SCALE);
+            enemy.hp = currentHpVal;
         });
 
         // Dọn dẹp enemy không còn trên server

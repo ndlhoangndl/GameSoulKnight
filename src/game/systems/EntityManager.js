@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createEnemy } from '../factories/createEnemy.js';
+import { SERVER_SCALE } from '../../utils/Constants.js';
 
 export class EntityManager {
     constructor(scene, camera, enemyTexture) {
@@ -10,7 +11,16 @@ export class EntityManager {
     }
 
     sync(spawns) {
-        const currentIds = new Set(spawns.map(s => s.Id));
+        if (!spawns) return;
+
+        const currentIds = new Set();
+        
+        spawns.forEach(data => {
+            const idVal = data.Id !== undefined ? data.Id : data.id;
+            const xVal = data.X !== undefined ? data.X : data.x;
+            const yVal = data.Y !== undefined ? data.Y : data.y;
+            if (idVal !== undefined) currentIds.add(idVal);
+        });
 
         // 1. Xóa những con không còn trong server
         for (const [id, mesh] of this.entities) {
@@ -22,13 +32,20 @@ export class EntityManager {
 
         // 2. Cập nhật hoặc tạo mới
         spawns.forEach(data => {
-            if (this.entities.has(data.Id)) {
+            const idVal = data.Id !== undefined ? data.Id : data.id;
+            const xVal = data.X !== undefined ? data.X : data.x;
+            const yVal = data.Y !== undefined ? data.Y : data.y;
+            
+            if (idVal === undefined || xVal === undefined || yVal === undefined) return;
+
+            const targetPos = new THREE.Vector3(xVal / SERVER_SCALE, 0.25, yVal / SERVER_SCALE);
+
+            if (this.entities.has(idVal)) {
                 // Cập nhật vị trí target
-                const mesh = this.entities.get(data.Id);
-                mesh.userData.targetPosition = new THREE.Vector3(data.X / 32, 0.5, data.Y / 32);
+                const mesh = this.entities.get(idVal);
+                mesh.userData.targetPosition = targetPos;
             } else {
                 // Tạo mới sử dụng factory cũ
-                const targetPos = new THREE.Vector3(data.X / 32, 0.5, data.Y / 32);
                 const enemy = createEnemy({
                     scene: this.scene,
                     camera: this.camera,
@@ -38,7 +55,7 @@ export class EntityManager {
                 });
                 const mesh = enemy.mesh;
                 mesh.userData.targetPosition = targetPos.clone();
-                this.entities.set(data.Id, mesh);
+                this.entities.set(idVal, mesh);
             }
         });
     }

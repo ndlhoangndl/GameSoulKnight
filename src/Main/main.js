@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { EnemyManager } from '../Entities/Enemy/EnemyManager.js';
 import { BulletManager } from '../Entities/BulletManager.js';
 
@@ -12,6 +13,7 @@ import { SocketManager } from '../core/SocketManager.js';
 import { MapRenderer } from '../game/systems/MapRenderer.js';
 import { EntityManager } from '../game/systems/EntityManager.js';
 import { MAP_1_HEIGHT, MAP_1_TILES, MAP_1_WIDTH } from '../game/maps/map1.js';
+import { SERVER_SCALE } from '../utils/Constants.js';
 
 // 1) Core context
 const { scene, camera, renderer, input, textures } = createGameContext();
@@ -36,17 +38,43 @@ player.onHpChanged = (hp, maxHp) => {
     if (hpFill) hpFill.style.width = `${(hp / maxHp) * 100}%`;
 };
 
-// Lắng nghe chuột trái để bắn — lưu reference để có thể cleanup sau
+// Raycaster & Mouse tracking để tính toán toạ độ bắn theo con trỏ chuột
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener('mousemove', (e) => {
+    // Chuyển đổi tọa độ chuột sang NDC [-1, 1]
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+// Lắng nghe chuột trái để bắn theo hướng con trỏ chuột
 const onMouseDown = (e) => {
-    if (e.button === 0) socketManager.sendShoot();
+    if (e.button === 0) {
+        // Cập nhật tia từ camera qua toạ độ chuột
+        raycaster.setFromCamera(mouse, camera);
+        
+        // Tìm giao điểm của tia với mặt phẳng nằm ngang Y = 0
+        const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+        const intersectPoint = new THREE.Vector3();
+        
+        if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
+            // Chuyển đổi toạ độ thế giới thực sang toạ độ server bằng cách nhân với SERVER_SCALE
+            const shootX = intersectPoint.x * SERVER_SCALE;
+            const shootY = intersectPoint.z * SERVER_SCALE;
+            socketManager.sendShoot(shootX, shootY);
+        } else {
+            socketManager.sendShoot();
+        }
+    }
 };
 window.addEventListener('mousedown', onMouseDown);
 
 // 5) Entities
 const enemyManager = new EnemyManager(scene, { boss: textures.boss, boss2: textures.boss2 });
 const bulletManager = new BulletManager(scene);
-// Make tiles larger so the map appears bigger on screen (adjustable)
-const mapRenderer = new MapRenderer(scene, { tileSize: 3 });
+// Đặt tileSize mặc định là 1 để khớp với tỉ lệ tọa độ của Server
+const mapRenderer = new MapRenderer(scene, { tileSize: 1 });
 const entityManager = new EntityManager(scene, camera, textures.boss);
 
 // 6) Gán references cho SocketManager
@@ -62,9 +90,10 @@ socketManager.game = {
 // 7) Kết nối WebSocket
 socketManager.connect().catch(e => {
     console.warn('Failed to connect WebSocket', e);
-    // Fallback: render map tĩnh để test khi không có server
-    mapRenderer.render(MAP_1_TILES, MAP_1_WIDTH, MAP_1_HEIGHT);
 });
+
+// Luôn dựng map mặc định ban đầu (Map 1) để tránh màn hình đen
+mapRenderer.render(MAP_1_TILES, MAP_1_WIDTH, MAP_1_HEIGHT, 1);
 
 // 8) Systems
 const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh, mapRenderer });
