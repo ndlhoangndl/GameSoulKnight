@@ -17,7 +17,7 @@ export class Camera extends THREE.OrthographicCamera {
         this.position.set(0, 100, 0);
         // make camera face straight down with no rotation skew
         this.rotation.set(-Math.PI / 2, 0, 0);
-        this.up.set(0, 0, 1);
+        this.up.set(0, 0, -1);
 
         // store current ortho half-height for resizing
         this._orthoHalfHeight = orthoSize;

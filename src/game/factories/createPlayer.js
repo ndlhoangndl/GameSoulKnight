@@ -14,10 +14,6 @@ export function createPlayer({ scene, texture, input, socketManager }) {
 		transparent: true
 	});
 	const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial);
-	// Rotate player mesh so it faces the camera/top-down correctly
-	// After switching camera to orthographic top-down, some sprites appear upside-down.
-	// Rotate 180deg around X to flip upright.
-	playerMesh.rotation.x = Math.PI;
 	scene.add(playerMesh);
 
 	const player = new Player(playerMesh);

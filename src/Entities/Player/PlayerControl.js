@@ -10,7 +10,7 @@ export class PlayerController {
         this._direction = new THREE.Vector3();
     }
 
-    update(dt = 1 / 60) {
+    update() {
         if (this.player.isDead) return;
 
         this._direction.set(0, 0, 0);

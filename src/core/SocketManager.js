@@ -123,7 +123,6 @@ export class SocketManager {
             this.game.bulletManager.syncWithServer(data.Bullets || []);
         }
     }
-
     send(data) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(data));
