@@ -5,7 +5,7 @@ const HP_BAR_WIDTH = 1.5
 const HP_BAR_HEIGHT = 0.2
 
 export class Enemy extends Entity {
-    constructor(mesh, maxHp = 100, radius = 0.75, opts = {}) {
+    constructor(mesh, maxHp = 50, radius = 0.75, opts = {}) {
         super({ mesh, hp: maxHp, radius });
         this.isDead = false;
         this.maxHp = maxHp;
@@ -54,7 +54,7 @@ export class Enemy extends Entity {
         // Trục Z cục bộ của mesh trỏ về hướng Y toàn cục (lên trên mặt đất).
         // offset Y = -(radius + 0.15) để kéo lên trên đầu quái, Z = 0.02 để nổi hẳn lên trên sprite
         this.hpBarContainer.position.set(0, -(this.radius + 0.15), 0.02);
-        this.mesh.add(this.hpBarContainer);
+        // this.mesh.add(this.hpBarContainer);
     }
 
     // Cập nhật độ dài thanh máu dựa trên phần trăm HP còn lại và đổi màu neon

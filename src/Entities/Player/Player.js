@@ -8,6 +8,11 @@ export class Player extends Entity {
         // Vector đích để lerp mượt từ server
         this.targetPosition = new THREE.Vector3(0, 0.25, 0);
 
+        // Hệ thống mana (MP) của người chơi
+        this.mp = 100;
+        this.maxMp = 100;
+        this.mpRegenSpeed = 15; // Hồi 15 MP mỗi giây
+
         // Callback để UI layer lắng nghe thay đổi HP — tránh entity biết về DOM
         this.onHpChanged = null;
     }
@@ -43,6 +48,15 @@ export class Player extends Entity {
             // Snap thẳng vị trí nếu khoảng cách rất nhỏ để tránh rung lắc
             if (this.mesh.position.distanceToSquared(this.targetPosition) < 0.0001) {
                 this.mesh.position.copy(this.targetPosition);
+            }
+        }
+
+        // Hồi mana tự động theo thời gian
+        if (this.mp < this.maxMp) {
+            this.mp = Math.min(this.maxMp, this.mp + this.mpRegenSpeed * dt);
+            const manaFill = document.getElementById('mana-fill');
+            if (manaFill) {
+                manaFill.style.width = `${(this.mp / this.maxMp) * 100}%`;
             }
         }
     }

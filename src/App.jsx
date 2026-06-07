@@ -19,17 +19,18 @@ export function App() {
                     <div id="mana-fill"></div>
                 </div>
 
-                <div className="hud-item kill-count-container">
-                    <div className="bar-label" id="kill-count-ui">Kills: 0 / 20 (Map 1)</div>
-                </div>
-                <div className="hud-item timer-container">
-                    <div className="bar-label" id="time-ui">Time: 0s</div>
-                </div>
-                <div className="hud-item storm-container">
-                    <div className="bar-label" id="storm-ui" style={{ color: 'red', display: 'none' }}>Bao Quai: 20s</div>
-                </div>
                 <div className="hud-item socket-check">
                     <div className="bar-label" id="socket-ui" style={{ color: 'yellow' }}>Trang thai Server: Connecting...</div>
+                </div>
+            </div>
+
+            <div id="enemy-hud" className="hidden">
+                <div className="enemy-bar-label-container">
+                    <div id="enemy-name">Quái vật</div>
+                    <div id="enemy-hp-text">0 / 50</div>
+                </div>
+                <div className="enemy-bar-container">
+                    <div id="enemy-hp-fill" style={{ width: '0%' }}></div>
                 </div>
             </div>
 
@@ -62,6 +63,25 @@ export function App() {
             <button id="btn-pause" className="pause-btn" type="button" aria-label="Pause" aria-pressed="false" title="Pause">
                 <span className="pause-icon" aria-hidden="true"></span>
             </button>
+
+            <div id="start-screen" className="overlay" aria-hidden="false">
+                <div className="overlay-card start-card">
+                    <div className="game-brand">
+                        <span className="brand-glow">SOUL KNIGHT</span>
+                        <span className="brand-edition">WEB SANDBOX</span>
+                    </div>
+                    
+                    <div className="game-desc">
+                        Chào mừng hiệp sĩ! Hãy sẵn sàng bước vào ngục tối bí ẩn, tiêu diệt quái vật hung ác và lập nên những kỷ lục chiến đấu đỉnh cao.
+                    </div>
+
+                    <button id="btn-start-game" className="start-btn" type="button">
+                        BẮT ĐẦU CHƠI
+                    </button>
+
+                    <div className="game-version">Version 1.2.0 | Developed by CloudMoon</div>
+                </div>
+            </div>
 
             <div id="loading-screen" className="loading-screen" aria-hidden="true">
                 <div className="loading-topbar">
@@ -100,6 +120,61 @@ export function App() {
                         <div className="map-node node-5">5</div>
                     </div>
                     <p className="map-guide">Ban dang o Map 1. Nhan tab/M de dong.</p>
+                </div>
+            </div>
+
+            <div id="pause-screen" className="overlay hidden" aria-hidden="true">
+                <div className="overlay-card pause-card">
+                    <div className="pause-header">
+                        <div className="pause-title">GAME PAUSED</div>
+                        <div className="pause-subtitle">Battle will resume once you are ready</div>
+                    </div>
+                    
+                    <div className="pause-divider"></div>
+                    
+                    <div className="pause-controls-guide">
+                        <h3>Huong dan dieu khien</h3>
+                        <div className="guide-row">
+                            <div className="key-group">
+                                <span className="key">W</span>
+                                <span className="key">A</span>
+                                <span className="key">S</span>
+                                <span className="key">D</span>
+                            </div>
+                            <span className="desc">Di chuyen</span>
+                        </div>
+                        <div className="guide-row">
+                            <div className="key-group">
+                                <span className="key" style={{ minWidth: '76px' }}>Con tro Chuot</span>
+                            </div>
+                            <span className="desc">Ngam huong ban</span>
+                        </div>
+                        <div className="guide-row">
+                            <div className="key-group">
+                                <span className="key" style={{ minWidth: '76px' }}>Chuot Trai</span>
+                            </div>
+                            <span className="desc">Ban thuong (0 MP)</span>
+                        </div>
+                        <div className="guide-row">
+                            <div className="key-group">
+                                <span className="key" style={{ minWidth: '76px' }}>Chuot Phai</span>
+                            </div>
+                            <span className="desc">Ban toa 5 tia (20 MP)</span>
+                        </div>
+                        <div className="guide-row">
+                            <div className="key-group">
+                                <span className="key" style={{ minWidth: '76px' }}>Tab / M</span>
+                            </div>
+                            <span className="desc">Mo ban do</span>
+                        </div>
+                    </div>
+
+                    <div className="pause-divider"></div>
+
+                    <div className="pause-actions">
+                        <button id="btn-resume-game" className="pause-action-btn primary">Tiep tuc</button>
+                        <button id="btn-restart-game" className="pause-action-btn secondary">Choi lai</button>
+                    </div>
                 </div>
             </div>
 

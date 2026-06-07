@@ -394,3 +394,318 @@ canvas {
 .node-1 { top: 110px; left: 160px; }
 .node-3 { top: 110px; left: 260px; }
 .node-5 { top: 190px; left: 160px; }
+
+/* --- Pause Screen overlay styles --- */
+.pause-card {
+    background: rgba(17, 24, 39, 0.82) !important;
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 24px !important;
+    padding: 28px !important;
+    font-family: 'Outfit', sans-serif !important;
+    width: min(450px, calc(100vw - 40px)) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85) !important;
+}
+
+.pause-header {
+    margin-bottom: 20px;
+}
+
+.pause-title {
+    color: #fbbf24;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+    animation: glowPulse 2s infinite ease-in-out;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        text-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow: 0 0 24px rgba(251, 191, 36, 0.85);
+        transform: scale(1.02);
+    }
+}
+
+.pause-subtitle {
+    color: #9ca3af;
+    font-size: 13px;
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+}
+
+.pause-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    margin: 20px 0;
+}
+
+.pause-controls-guide {
+    text-align: left;
+    background: rgba(10, 15, 30, 0.5);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pause-controls-guide h3 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    font-family: 'Share Tech Mono', monospace;
+    color: #fbbf24;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.guide-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.guide-row:last-child {
+    margin-bottom: 0;
+}
+
+.key-group {
+    display: flex;
+    gap: 4px;
+    min-width: 130px;
+}
+
+.key {
+    background: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 800;
+    font-size: 12px;
+    color: #fbbf24;
+    box-shadow: 0 3px 0 #1f2937;
+    text-align: center;
+}
+
+.desc {
+    color: #e5e7eb;
+    font-size: 13px;
+    font-weight: 500;
+    margin-left: 12px;
+}
+
+.pause-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.pause-action-btn {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pause-action-btn.primary {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #030712;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pause-action-btn.primary:hover {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+    transform: translateY(-2px);
+}
+
+.pause-action-btn.secondary {
+    background: rgba(31, 41, 55, 0.7);
+    color: #e5e7eb;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.pause-action-btn.secondary:hover {
+    background: rgba(55, 65, 81, 0.9);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* --- Start Screen overlay styles --- */
+.start-card {
+    background: rgba(10, 12, 22, 0.85) !important;
+    backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 28px !important;
+    padding: 40px !important;
+    font-family: 'Outfit', sans-serif !important;
+    width: min(500px, calc(100vw - 40px)) !important;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), 0 0 40px rgba(251, 191, 36, 0.1) !important;
+    text-align: center;
+}
+
+.game-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.brand-glow {
+    color: #fbbf24;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.7);
+    animation: titlePulse 2.5s infinite ease-in-out;
+}
+
+@keyframes titlePulse {
+    0%, 100% {
+        text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow: 0 0 30px rgba(251, 191, 36, 0.95);
+        transform: scale(1.03);
+    }
+}
+
+.brand-edition {
+    color: #e5e7eb;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    margin-top: 4px;
+    opacity: 0.95;
+}
+
+.game-desc {
+    color: #d1d5db;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 36px;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.start-btn {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 16px 44px;
+    font-size: 18px;
+    font-weight: 900;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #030712;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.start-btn:hover {
+    box-shadow: 0 0 45px rgba(251, 191, 36, 0.85);
+    transform: scale(1.05) translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.45);
+}
+
+.start-btn:active {
+    transform: scale(0.98) translateY(-1px);
+}
+
+.game-version {
+    margin-top: 40px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #4b5563;
+    letter-spacing: 0.05em;
+}
+
+/* Enemy HP HUD at top-center */
+#enemy-hud {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(17, 24, 39, 0.75); /* Premium glassmorphism */
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 14px 20px;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    width: 320px;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+}
+
+#enemy-hud.hidden {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+    pointer-events: none;
+}
+
+.enemy-bar-label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+#enemy-name {
+    color: #fca5a5; /* Soft light red */
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+#enemy-hp-text {
+    color: #f3f4f6;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.enemy-bar-container {
+    width: 100%;
+    height: 10px;
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5) inset;
+}
+
+#enemy-hp-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f43f5e, #b91c1c); /* Red gradient */
+    border-radius: 9999px;
+    transition: width 0.15s ease-out;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}

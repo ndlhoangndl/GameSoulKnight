@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { EnemyManager } from '../Entities/Enemy/EnemyManager.js';
 import { BulletManager } from '../Entities/BulletManager.js';
 
 import { createGameContext } from '../game/bootstrap/createGameContext.js';
@@ -48,9 +47,15 @@ window.addEventListener('mousemove', (e) => {
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 });
 
-// Lắng nghe chuột trái để bắn theo hướng con trỏ chuột
+// Ngăn chặn menu chuột phải mặc định trong game để dùng chuột phải bắn kỹ năng
+window.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
+
+// Lắng nghe chuột trái (bắn thường) và chuột phải (kỹ năng đặc biệt) để bắn theo hướng con trỏ chuột
 const onMouseDown = (e) => {
-    if (e.button === 0) {
+    // 0: Chuột trái (bắn thường, không tốn mana), 2: Chuột phải (bắn 5 tia, tốn 20 mana)
+    if (e.button === 0 || e.button === 2) {
         // Cập nhật tia từ camera qua toạ độ chuột
         raycaster.setFromCamera(mouse, camera);
         
@@ -59,29 +64,51 @@ const onMouseDown = (e) => {
         const intersectPoint = new THREE.Vector3();
         
         if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
-            // Chuyển đổi toạ độ thế giới thực sang toạ độ server bằng cách nhân với SERVER_SCALE
-            const shootX = intersectPoint.x * SERVER_SCALE;
-            const shootY = intersectPoint.z * SERVER_SCALE;
-            socketManager.sendShoot(shootX, shootY);
+            // Tính toán vector hướng từ vị trí player tới điểm click chuột trong world space
+            const dirX = intersectPoint.x - playerMesh.position.x;
+            const dirY = intersectPoint.z - playerMesh.position.z;
+            
+            if (e.button === 2) {
+                // Kiểm tra mana trước khi dùng kỹ năng chuột phải
+                if (player && player.mp >= 20) {
+                    player.mp -= 20;
+                    // Cập nhật giao diện mana ngay lập tức
+                    const manaFill = document.getElementById('mana-fill');
+                    if (manaFill) {
+                        manaFill.style.width = `${(player.mp / player.maxMp) * 100}%`;
+                    }
+                    socketManager.sendShoot(dirX, dirY, true); // Bắn đạn đặc biệt (5 tia)
+                } else {
+                    // Hiệu ứng nhấp nháy đỏ thanh mana báo hiệu hết mana
+                    const manaContainer = document.querySelector('#player-ui .bar-container:nth-of-type(2)');
+                    if (manaContainer) {
+                        manaContainer.style.borderColor = '#ef4444';
+                        setTimeout(() => {
+                            manaContainer.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                        }, 150);
+                    }
+                }
+            } else {
+                socketManager.sendShoot(dirX, dirY, false); // Bắn đạn thường (1 tia)
+            }
         } else {
-            socketManager.sendShoot();
+            socketManager.sendShoot(0, 0, false);
         }
     }
 };
 window.addEventListener('mousedown', onMouseDown);
 
 // 5) Entities
-const enemyManager = new EnemyManager(scene, { boss: textures.boss, boss2: textures.boss2 });
 const bulletManager = new BulletManager(scene);
 // Đặt tileSize mặc định là 1 để khớp với tỉ lệ tọa độ của Server
 const mapRenderer = new MapRenderer(scene, { tileSize: 1 });
 const entityManager = new EntityManager(scene, camera, textures.boss);
+entityManager.player = player;
 
 // 6) Gán references cho SocketManager
 socketManager.game = {
     worldSystem,
     player,
-    enemyManager,
     bulletManager,
     mapRenderer,
     entityManager
@@ -97,12 +124,12 @@ mapRenderer.render(MAP_1_TILES, MAP_1_WIDTH, MAP_1_HEIGHT, 1);
 
 // 8) Systems
 const cameraFollowSystem = createCameraFollowSystem({ camera, targetMesh: playerMesh, mapRenderer });
+socketManager.game.cameraFollowSystem = cameraFollowSystem;
 
 // 9) Game loop
 const gameLoop = wireGameLoop({
     playerController,
     player,
-    enemyManager,
     scene,
     cameraFollowSystem,
     renderer,
@@ -112,16 +139,30 @@ const gameLoop = wireGameLoop({
     bulletManager
 });
 
-// 10) Loading screen
+// 10) Start Screen and Loading Sequence
 const loading = new LoadingScreen();
-loading.show();
 
-try {
-    await loading.fakeLoad({ durationMs: 3500 });
-} finally {
-    // gameLoop.start() luôn chạy dù fakeLoad có lỗi
+const startScreen = document.getElementById('start-screen');
+const btnStartGame = document.getElementById('btn-start-game');
+
+if (btnStartGame && startScreen) {
+    btnStartGame.addEventListener('click', async () => {
+        // 1. Ẩn màn hình Start Screen
+        startScreen.classList.add('hidden');
+        startScreen.setAttribute('aria-hidden', 'true');
+
+        // 2. Chạy màn hình Loading Screen
+        try {
+            await loading.fakeLoad({ durationMs: 3500 });
+        } finally {
+            // 3. Khởi chạy game loop sau khi load xong
+            gameLoop.start();
+            loading.hide();
+        }
+    });
+} else {
+    // Dự phòng
     gameLoop.start();
-    loading.hide();
 }
 
 // 11) Pause button

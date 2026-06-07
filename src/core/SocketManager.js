@@ -7,6 +7,7 @@ export class SocketManager {
         this.socket = null;
         this.myPlayerId = null;
         this.currentRoomId = null;
+        this.roomJustSwitched = false;
 
         // Heartbeat — giữ kết nối sống bằng cách ping định kỳ
         this._pingInterval = null;
@@ -23,7 +24,8 @@ export class SocketManager {
         return new Promise((resolve, reject) => {
             try {
                 this._manualClose = false;
-                const WSS_URL = "wss://pblgame.huyn.site/ws";
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const WSS_URL = isLocal ? "ws://localhost:5000/ws" : "wss://pblgame.huyn.site/ws";
                 this.socket = new WebSocket(WSS_URL);
 
                 this.socket.addEventListener("open", () => {
@@ -155,6 +157,7 @@ export class SocketManager {
 
         if (this.currentRoomId === roomId && !isNaN(roomId)) return;
         this.currentRoomId = roomId;
+        this.roomJustSwitched = true;
 
         console.log(`🗺️ Switching to Room: ${roomId} (LevelId: ${data.LevelId || data.levelId})`);
 
@@ -185,7 +188,7 @@ export class SocketManager {
             const wallCount = tiles.filter(t => t === 0).length;
             console.log('Room tiles', { roomId, levelId: data.LevelId || data.levelId, width, height, tileSize, wallCount, doorCount });
 
-            this.game.mapRenderer.render(tiles, width, height, tileSize);
+            this.game.mapRenderer.render(tiles, width, height, tileSize, roomId);
         }
     }
 
@@ -202,14 +205,19 @@ export class SocketManager {
         if (this.game.player) {
             if (playerX !== undefined && playerY !== undefined) {
                 this.game.player.targetPosition = new THREE.Vector3(
-                    playerX / SERVER_SCALE,
+                    (playerX + 24) / SERVER_SCALE,
                     0.25,
-                    playerY / SERVER_SCALE
+                    (playerY + 24) / SERVER_SCALE
                 );
 
-                // Snap về vị trí ngay lần đầu thay vì lerp từ (0,0,0)
-                if (this.game.player.mesh.position.x === 0 && this.game.player.mesh.position.z === 0) {
+                // Snap về vị trí ngay lần đầu thay vì lerp từ (0,0,0) hoặc khi vừa chuyển phòng
+                const isInitial = (this.game.player.mesh.position.x === 0 && this.game.player.mesh.position.z === 0);
+                if (isInitial || this.roomJustSwitched) {
                     this.game.player.mesh.position.copy(this.game.player.targetPosition);
+                    if (this.game.cameraFollowSystem) {
+                        this.game.cameraFollowSystem.snapNext = true;
+                    }
+                    this.roomJustSwitched = false;
                 }
             }
 
@@ -217,11 +225,8 @@ export class SocketManager {
         }
 
         // 2. Sync enemies và bullets
-        if (this.game.enemyManager) {
-            this.game.enemyManager.syncWithServer(spawns);
-        }
         if (this.game.entityManager) {
-            this.game.entityManager.sync(spawns, SERVER_SCALE);
+            this.game.entityManager.sync(spawns);
         }
         if (this.game.bulletManager) {
             this.game.bulletManager.syncWithServer(bullets);
@@ -250,13 +255,13 @@ export class SocketManager {
         });
     }
 
-    // x, y là tọa độ server (world coords * SERVER_SCALE)
-    sendShoot(x, y) {
+    sendShoot(x, y, isSpecial = false) {
         this.send({
             EventId: "Shoot",
             PlayerId: this.myPlayerId,
-            X: Math.round(x),
-            Y: Math.round(y)
+            X: x,
+            Y: y,
+            IsSpecial: isSpecial
         });
     }
 }

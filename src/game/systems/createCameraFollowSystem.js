@@ -20,7 +20,8 @@ export function createCameraFollowSystem({ camera, targetMesh, mapRenderer }) {
 		return Math.max(minHeight, fromHeight, fromWidth);
 	}
 
-	return {
+	const system = {
+		snapNext: false,
 		update(dt) {
 			if (!targetMesh) return;
 
@@ -46,8 +47,14 @@ export function createCameraFollowSystem({ camera, targetMesh, mapRenderer }) {
 								? THREE.MathUtils.clamp(focus.z, minCamZ, maxCamZ)
 								: bounds.centerZ;
 
-							camera.position.x = THREE.MathUtils.lerp(camera.position.x, desiredX, Math.min(1, dt * smooth));
-							camera.position.z = THREE.MathUtils.lerp(camera.position.z, desiredZ, Math.min(1, dt * smooth));
+							if (system.snapNext) {
+								camera.position.x = desiredX;
+								camera.position.z = desiredZ;
+								system.snapNext = false;
+							} else {
+								camera.position.x = THREE.MathUtils.lerp(camera.position.x, desiredX, Math.min(1, dt * smooth));
+								camera.position.z = THREE.MathUtils.lerp(camera.position.z, desiredZ, Math.min(1, dt * smooth));
+							}
 							camera.lookAt(focus.x, 0, focus.z);
 				return;
 			}
@@ -61,4 +68,6 @@ export function createCameraFollowSystem({ camera, targetMesh, mapRenderer }) {
 			camera.lookAt(focus.x, 0, focus.z);
 		}
 	};
+
+	return system;
 }

@@ -13,9 +13,9 @@ export function createGameContext() {
 
 	const loader = new THREE.TextureLoader();
 
-	const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+	const ambientLight = new THREE.AmbientLight(0x222233, 0.4);
 	scene.add(ambientLight);
-	const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+	const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
 	dirLight.position.set(5, 10, 7);
 	scene.add(dirLight);
 
